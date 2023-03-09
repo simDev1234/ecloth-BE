@@ -1,0 +1,61 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '2.7.9'
+    id 'io.spring.dependency-management' version '1.0.15.RELEASE'
+}
+
+group = 'com.ecloth'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '11'
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+
+    // WEB
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+	  // RDB / NoSQL
+	  implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	  implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
+	  runtimeOnly 'com.h2database:h2'
+	  runtimeOnly 'com.mysql:mysql-connector-j'
+
+	  // Swagger 
+  	implementation 'io.springfox:springfox-boot-starter:3.0.0'
+
+    // TEST
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+    // ETC
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    implementation 'com.github.ulisesbocchio:jasypt-spring-boot-starter:3.0.4'
+
+    // Spring Security
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+
+    // JWT
+    implementation 'io.jsonwebtoken:jjwt:0.9.1'
+
+    // BaseEntity
+    implementation 'org.springframework.data:spring-data-envers'
+
+    // Java Mail Sender
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
+
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
