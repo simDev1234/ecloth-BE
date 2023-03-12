@@ -4,17 +4,9 @@ public enum MemberStatus {
     /*
     미인증,사용,정지,탈퇴
     */
-    UNVERIFIED("Unverified"),
-    ACTIVE("Active"),
-    SUSPENDED("Suspended"),
-    INACTIVE("Inactive");
-    private final String status;
+    UNVERIFIED,
+    ACTIVE,
+    SUSPENDED,
+    INACTIVE
 
-    MemberStatus(String status) {
-        this.status = status;
-    }
-
-    public String getStatus() {
-        return status;
-    }
 }

@@ -6,28 +6,20 @@ import com.ecloth.beta.member.model.MemberStatus;
 import lombok.*;
 import org.hibernate.envers.AuditOverride;
 import org.hibernate.validator.constraints.Length;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-@Entity(name = "MEMBER")
+@Entity
 @Getter
 @Builder(toBuilder = true)
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
 @AuditOverride(forClass = BaseEntity.class)
-public class Member extends BaseEntity implements UserDetails {
+public class Member extends BaseEntity {
 
     @Id
     @Column(name = "member_id", nullable = false)
@@ -67,38 +59,10 @@ public class Member extends BaseEntity implements UserDetails {
     private String latitude;
     private String longitude;
 
+    // 팔로우,팔로워
+    private long follow_cnt;
+    private long follower_cnt;
+
     @Enumerated(EnumType.STRING)
     private MemberRole memberRole;
-
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Stream.of(memberRole)
-                .map(role -> new SimpleGrantedAuthority(role.getRole()))
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public String getUsername() {
-        return email;
-    }
-
-    @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isAccountNonLocked() {
-        return true;
-    }
-
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return true;
-    }
 }
