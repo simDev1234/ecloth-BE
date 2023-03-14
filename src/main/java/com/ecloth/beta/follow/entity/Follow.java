@@ -1,42 +1,31 @@
 package com.ecloth.beta.follow.entity;
 
+import com.ecloth.beta.common.entity.BaseEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.ColumnDefault;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
+import org.hibernate.envers.AuditOverride;
 import javax.persistence.*;
-import java.time.LocalDateTime;
 
 @Entity
 @Getter
 @NoArgsConstructor
 @Builder
 @AllArgsConstructor
-@EntityListeners(value = {AuditingEntityListener.class})
-public class Follow {
+@AuditOverride(forClass = BaseEntity.class)
+public class Follow extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "follow_id")
-    private Long id;
+    @Column(name = "follow_id", nullable = false)
+    private Long followId;
 
     private Long requesterId;
 
     private Long targetId;
 
-    @ColumnDefault(value = "true")
     private boolean followStatus;
-
-    @CreatedDate
-    private LocalDateTime createdDate;
-
-    @LastModifiedDate
-    private LocalDateTime updatedDate;
 
     public void changeFollowStatus(boolean isFollowing) {
         this.followStatus = isFollowing;

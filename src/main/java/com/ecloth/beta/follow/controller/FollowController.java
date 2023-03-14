@@ -1,19 +1,17 @@
 package com.ecloth.beta.follow.controller;
 
-import com.ecloth.beta.follow.dto.FollowList;
-import com.ecloth.beta.follow.dto.Following;
-import com.ecloth.beta.follow.exception.FollowException;
+import com.ecloth.beta.follow.dto.FollowListRequest;
+import com.ecloth.beta.follow.dto.FollowListResponse;
+import com.ecloth.beta.follow.dto.FollowingRequest;
+import com.ecloth.beta.follow.dto.FollowingResponse;
 import com.ecloth.beta.follow.service.FollowService;
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 import java.security.Principal;
-import static com.ecloth.beta.follow.exception.ErrorCode.FOLLOW_REQUEST_NOT_VALID;
-import static com.ecloth.beta.follow.exception.ErrorCode.UNFOLLOW_REQUEST_NOT_VALID;
+import static com.ecloth.beta.follow.type.PointDirection.FOLLOWS;
 
 @RestController
 @RequiredArgsConstructor
@@ -24,47 +22,57 @@ public class FollowController {
     private final FollowService followService;
 
     @PostMapping("/follow")
-    public ResponseEntity<Following.Response> follow(@ApiIgnore Principal principal,
-                                    @RequestBody Following.Request request){
-
-        if (request.isFollowStatus() == false) {
-            throw new FollowException(FOLLOW_REQUEST_NOT_VALID);
-        }
+    public ResponseEntity<FollowingResponse> followSave(@ApiIgnore Principal principal,
+                                                        @RequestBody FollowingRequest request){
 
         String requesterEmail = principal.getName();
-        Following.Response response = followService.followOrUnFollowTarget(requesterEmail, request);
+        FollowingResponse response = followService.saveFollow(requesterEmail, request);
 
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/follow")
-    public ResponseEntity<Following.Response> getFollowStatus(@ApiIgnore Principal principal,
-                                                             @RequestParam Long targetId){
+    public ResponseEntity<FollowingResponse> followCountOfMine(@ApiIgnore Principal principal){
 
-        Following.Response response = followService.getFollowStatus(principal.getName(), targetId);
+        FollowingResponse response = followService.findFollowCountOfMine(principal.getName());
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{requesterId}/follow")
+    public ResponseEntity<FollowingResponse> followCountAndMyFollowingStatusOfTarget(@ApiIgnore Principal principal,
+                                                                                     @PathVariable long requesterId){
+
+        FollowingResponse response
+                = followService.findFollowCountAndMyFollowingStatusOfTarget(principal.getName(), requesterId);
 
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/follows")
-    public ResponseEntity<FollowList.Response> getFollowList(@ApiIgnore Principal principal,
-                                                             @RequestBody FollowList.Request request){
+    public ResponseEntity<FollowListResponse> followListOfMine(@ApiIgnore Principal principal,
+                                                               @RequestBody FollowListRequest request){
 
-        FollowList.Response response = followService.getFollowList(principal.getName(), request);
+        FollowListResponse response;
+        if (FOLLOWS.name().equals(request.getPointDirection())) {
+            response = followService.findFollowListOfMine(principal.getName(), request.getPage());
+        } else {
+            response = followService.findFollowerListOfMine(principal.getName(), request.getPage());
+        }
 
         return ResponseEntity.ok(response);
     }
 
-    @PatchMapping("/follow")
-    public ResponseEntity<Following.Response> unfollow(@ApiIgnore Principal principal,
-                                                        @RequestBody Following.Request request){
+    @GetMapping("/{requesterId}/follows")
+    public ResponseEntity<FollowListResponse> followListOfTarget(@PathVariable long requesterId,
+                                                                 @RequestBody FollowListRequest request){
 
-        if (request.isFollowStatus() == true) {
-            throw new FollowException(UNFOLLOW_REQUEST_NOT_VALID);
+        FollowListResponse response;
+        if (FOLLOWS.name().equals(request.getPointDirection())) {
+            response = followService.findFollowListOf(requesterId, request.getPage());
+        } else {
+            response = followService.findFollowerListOf(requesterId, request.getPage());
         }
-
-        String requesterEmail = principal.getName();
-        Following.Response response = followService.followOrUnFollowTarget(requesterEmail, request);
 
         return ResponseEntity.ok(response);
     }
