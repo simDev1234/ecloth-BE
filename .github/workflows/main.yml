@@ -1,0 +1,44 @@
+name: Ecloth CI/CD
+
+on:
+  pull_request:
+    branches: [ main ]
+
+env:
+  S3_BUCKET_NAME: weatheroutfit
+  RESOURCE_PATH: ./src/main/resources/application-develop.properties
+  CODE_DEPLOY_APPLICATION_NAME: ecloth
+  CODE_DEPLOY_DEPLOYMENT_GROUP_NAME: ecloth-group
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      # 체크아웃
+      - name: check out
+        uses: actions/checkout@v3
+
+      # Gradle 권한
+      - name: grant all permission to gradlew
+        run: sudo chmod 777 ~/ecloth-BE/gradlew
+        shell: bash
+
+      # Build
+      - name: build
+        run: sudo ~/ecloth-BE/gradlew build
+        shell: bash
+
+      # Logback 권한
+      - name: grant all permission to logback
+        run: sudo chmod 777 ~/ecloth-BE/build/libs
+        shell: bash
+
+      # 실행 파일 위치로 이동
+      - name: move to jar file location
+        run: cd ~/ecloth-BE/build/libs
+        shell: bash
+
+      # 실행
+      - name: activate java jar with nohup
+        run: nohup java -jar -Djasypt.encryptor.password=weatheroutfit -Dspring.profiles.active=develop beta-0.0.1-SNAPSHOT.jar
+        shell: bash
