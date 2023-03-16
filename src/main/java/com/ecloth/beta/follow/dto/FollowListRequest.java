@@ -15,7 +15,7 @@ public class FollowListRequest extends CustomPage{
     private String dir;
 
     FollowListRequest(String dir){
-        super(1, 5, "created_date", "dsc");
+        super(1, 5, "registerDate", "dsc");
         this.dir = dir;
     }
 
