@@ -1,8 +1,8 @@
-package com.ecloth.beta.member.jwt;
+package com.ecloth.beta.common.jwt;
 
 import com.ecloth.beta.member.dto.Token;
-import com.ecloth.beta.member.security.MemberDetailService;
-import com.ecloth.beta.member.security.MemberDetails;
+import com.ecloth.beta.common.security.MemberDetailService;
+import com.ecloth.beta.common.security.MemberDetails;
 import io.jsonwebtoken.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,9 +18,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static com.ecloth.beta.member.jwt.JwtProperties.ACCESS_TOKEN_EXPIRE_TIME;
-import static com.ecloth.beta.member.jwt.JwtProperties.REFRESH_TOKEN_EXPIRE_TIME;
 
 @Component
 @Slf4j
@@ -42,7 +39,7 @@ public class JwtTokenProvider {
         Date issuedAt = new Date();
         long now = new Date().getTime();
 
-        Date accessTokenExpiredIn = new Date(now + ACCESS_TOKEN_EXPIRE_TIME);
+        Date accessTokenExpiredIn = new Date(now + JwtProperties.ACCESS_TOKEN_EXPIRE_TIME);
         String accessToken = Jwts.builder()
                 .setSubject(memberDetails.getUsername())
                 .claim("ROLE", authorities)
@@ -52,7 +49,7 @@ public class JwtTokenProvider {
                 .compact();
 
 
-        Date refreshTokenExpiredIn = new Date(now + REFRESH_TOKEN_EXPIRE_TIME);
+        Date refreshTokenExpiredIn = new Date(now + JwtProperties.REFRESH_TOKEN_EXPIRE_TIME);
         String refreshToken = Jwts.builder()
                 .setSubject(memberDetails.getUsername())
                 .claim("ROLE", authorities)
@@ -65,7 +62,7 @@ public class JwtTokenProvider {
         return Token.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
-                .refreshTokenExpirationTime(REFRESH_TOKEN_EXPIRE_TIME)
+                .refreshTokenExpirationTime(JwtProperties.REFRESH_TOKEN_EXPIRE_TIME)
                 .build();
     }
 
