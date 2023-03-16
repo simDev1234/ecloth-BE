@@ -1,4 +1,4 @@
-package com.ecloth.beta.member.model;
+package com.ecloth.beta.common.entity;
 
 import lombok.Getter;
 import org.springframework.data.annotation.CreatedDate;

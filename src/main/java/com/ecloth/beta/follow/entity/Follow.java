@@ -1,45 +1,47 @@
 package com.ecloth.beta.follow.entity;
 
+import com.ecloth.beta.common.entity.BaseEntity;
+import com.ecloth.beta.member.entity.Member;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.ColumnDefault;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
+import org.hibernate.envers.AuditOverride;
 import javax.persistence.*;
-import java.time.LocalDateTime;
 
 @Entity
 @Getter
 @NoArgsConstructor
 @Builder
 @AllArgsConstructor
-@EntityListeners(value = {AuditingEntityListener.class})
-public class Follow {
+@AuditOverride(forClass = BaseEntity.class)
+public class Follow extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "follow_id")
-    private Long id;
+    @Column(name = "follow_id", nullable = false)
+    private Long followId;
 
-    private Long requesterId;
+    @ManyToOne
+    @JoinColumn(name = "requester_id")
+    private Member requester;
 
-    private Long targetId;
+    @ManyToOne
+    @JoinColumn(name = "target_id")
+    private Member target;
 
-    @ColumnDefault(value = "true")
-    private boolean followStatus;
+    public void changeRequester(Member requester){
+        this.requester = requester;
+        if (!requester.getFollowList().contains(this)) {
+            requester.getFollowList().add(this);
+        }
+    }
 
-    @CreatedDate
-    private LocalDateTime createdDate;
-
-    @LastModifiedDate
-    private LocalDateTime updatedDate;
-
-    public void changeFollowStatus(boolean isFollowing) {
-        this.followStatus = isFollowing;
+    public void changeTarget(Member target){
+        this.target = target;
+        if (!target.getFollowerList().contains(this)){
+            target.getFollowerList().add(this);
+        }
     }
 
 }

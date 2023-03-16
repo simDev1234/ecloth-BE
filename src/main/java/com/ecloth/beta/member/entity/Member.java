@@ -1,6 +1,7 @@
 package com.ecloth.beta.member.entity;
 
-import com.ecloth.beta.member.model.BaseEntity;
+import com.ecloth.beta.common.entity.BaseEntity;
+import com.ecloth.beta.follow.entity.Follow;
 import com.ecloth.beta.member.model.MemberRole;
 import com.ecloth.beta.member.model.MemberStatus;
 import lombok.AllArgsConstructor;
@@ -8,9 +9,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.envers.AuditOverride;
-
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Getter
@@ -21,7 +22,7 @@ import java.time.LocalDateTime;
 public class Member extends BaseEntity {
 
     @Id
-    @Column(name = "member_id", nullable = false)
+    @Column(name = "member_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long memberId;
 
@@ -52,9 +53,11 @@ public class Member extends BaseEntity {
     private String latitude;
     private String longitude;
 
-    // 팔로우,팔로워
-    private long follow_cnt;
-    private long follower_cnt;
+    // follow & follower list
+    @OneToMany(mappedBy = "requester")
+    private List<Follow> followList;
+    @OneToMany(mappedBy = "target")
+    private List<Follow> followerList;
 
     @Enumerated(EnumType.STRING)
     private MemberRole memberRole;
