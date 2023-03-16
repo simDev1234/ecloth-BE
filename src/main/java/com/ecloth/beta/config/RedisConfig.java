@@ -1,4 +1,4 @@
-package com.ecloth.beta.member.config;
+package com.ecloth.beta.config;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.data.redis.RedisProperties;

@@ -105,7 +105,7 @@ public class MemberService {
         // redis에 RT:이메일(key) / RT토큰(value) 형태로 리프레시 토큰 저장하기
         redisTemplate.opsForValue().set("RT:" + member.getEmail(), token.getRefreshToken(), token.getRefreshTokenExpirationTime(), TimeUnit.MILLISECONDS);
 
-        // AccessToken을 Http Header에, RefreshToken을 Http Body에 담아 반환하기
+        // AccessToken과 RefreshToken Http Header에 담아 반환하기
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", "Bearer " + token.getAccessToken());
         headers.add("RefreshToken", "Bearer " + token.getRefreshToken());
