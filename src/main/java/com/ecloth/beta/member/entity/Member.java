@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.envers.AuditOverride;
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Getter
@@ -52,13 +53,11 @@ public class Member extends BaseEntity {
     private String latitude;
     private String longitude;
 
-    // follow & follower cnt
+    // follow & follower list
     @OneToMany(mappedBy = "requester")
     private List<Follow> followList;
     @OneToMany(mappedBy = "target")
     private List<Follow> followerList;
-//    private long followCnt;
-//    private long followerCnt;
 
     @Enumerated(EnumType.STRING)
     private MemberRole memberRole;

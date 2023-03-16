@@ -38,7 +38,7 @@ public class FollowController {
 
     }
 
-    @GetMapping("/{memberId}/follow")
+    @GetMapping("/{memberId}/follow/status")
     public ResponseEntity<Boolean> followingStatus(@ApiIgnore Principal principal,
                                                    @PathVariable Long memberId){
 
