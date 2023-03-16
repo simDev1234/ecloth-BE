@@ -83,6 +83,14 @@ private List<FollowMember> addMemberInfoToFollowResult(Page<Follow> follows) {
     return followMembers;
 }
 ```
+- 콘솔에 출력된 쿼리문 :
+  1. 회원 정보를 두 번 불러온 후, (+2N)
+  2. 팔로우 목록을 조회하고 (+N)
+  3. 팔로우 목록 수만큼 회원 정보를 조회한다.(+N)
+
+- JMeter에 출력된 결과 : 1만 개의 샘플을 5번의 루프로 돌린 결과
+  1) 하나의 요청당 평균 ms 속도로 처리 되었으며,
+  2) 초당 트랜잭션 수(TPS)는 가장 많을 때 약 개가 나타났다.
 
 [2] 양방향 연관관계가 있는 경우
 - 회원 <-> 팔로우
