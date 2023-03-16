@@ -2,7 +2,6 @@ package com.ecloth.beta.member.dto;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 
 public class MemberRequest {
 
@@ -20,24 +19,13 @@ public class MemberRequest {
     public static class Login {
         private String email;
         private String password;
-
-        public UsernamePasswordAuthenticationToken toAuthentication() {
-            return new UsernamePasswordAuthenticationToken(email, password);
-
-        }
     }
 
     @Getter
     @Setter
-    public static class Logout {
+    public static class TokenRequest {
         private String accessToken;
         private String refreshToken;
     }
 
-    @Getter
-    @Setter
-    public static class Reissue {
-        private String accessToken;
-        private String refreshToken;
-    }
 }

@@ -3,19 +3,18 @@ package com.ecloth.beta.member.entity;
 import com.ecloth.beta.member.model.BaseEntity;
 import com.ecloth.beta.member.model.MemberRole;
 import com.ecloth.beta.member.model.MemberStatus;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.hibernate.envers.AuditOverride;
-import org.hibernate.validator.constraints.Length;
 
 import javax.persistence.*;
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotEmpty;
 import java.time.LocalDateTime;
 
 @Entity
 @Getter
 @Builder(toBuilder = true)
-@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 @AuditOverride(forClass = BaseEntity.class)
@@ -27,19 +26,13 @@ public class Member extends BaseEntity {
     private Long memberId;
 
     @Column(unique = true)
-    @NotEmpty(message = "이메일은 필수 입력 값입니다.")
-    @Email(message = "이메일 형식으로 입력해주세요.")
     private String email;
 
-    @NotEmpty(message = "비밀번호는 필수 입력 값입니다.")
-    @Length(min = 8, message = "최소 8 자, 하나 이상의 문자, 하나의 숫자 및 하나의 특수 문자로 입력해주세요.")
     private String password;
 
     @Column(unique = true)
-    @NotEmpty(message = "닉네임은 필수 입력 값입니다.")
     private String nickname;
 
-    @NotEmpty(message = "전화번호는 필수 입력 값입니다.")
     private String phone;
 
     private String profileImagePath;
