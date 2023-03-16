@@ -1,6 +1,7 @@
 package com.ecloth.beta.follow.dto;
 
 import com.ecloth.beta.follow.entity.Follow;
+import com.ecloth.beta.member.entity.Member;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.AllArgsConstructor;
@@ -19,11 +20,10 @@ public class FollowingRequest implements Serializable {
     private Long targetId;
     @Builder.Default
     private boolean followStatus = true;
-    public Follow toEntity(Long requesterId) {
+    public Follow toEntity(Member requester, Member target) {
         return Follow.builder()
-                .requesterId(requesterId)
-                .targetId(this.targetId)
-                .followStatus(this.followStatus)
+                .requester(requester)
+                .target(target)
                 .build();
     }
 

@@ -1,27 +1,31 @@
 package com.ecloth.beta.follow.dto;
 
 import com.ecloth.beta.common.page.CustomPage;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
-import com.fasterxml.jackson.databind.annotation.JsonNaming;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import javax.validation.constraints.NotBlank;
-import java.io.Serializable;
 
-@AllArgsConstructor
-@Builder
+@NoArgsConstructor
 @Getter
-@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
-public class FollowListRequest implements Serializable{
-
-    private static final long serialVersionUID = 1L;
+@Setter
+public class FollowListRequest extends CustomPage{
 
     @NotBlank
-    private String pointDirection;
+    private String dir;
 
-    @Builder.Default
-    private CustomPage page = new CustomPage(1, 5, "createdDate", "dsc");
+    FollowListRequest(String dir){
+        super(1, 5, "created_date", "dsc");
+        this.dir = dir;
+    }
 
+    FollowListRequest(String dir, int page, int size, String sortBy, String sortOrder){
+        super(page, size, sortBy, sortOrder);
+        this.dir = dir;
+    }
+
+    public CustomPage getCustomPage(){
+        return new CustomPage(this.getPage(), this.getSize(), this.getSortBy(), this.getSortOrder());
+    }
 
 }

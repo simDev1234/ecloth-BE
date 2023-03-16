@@ -1,6 +1,7 @@
 package com.ecloth.beta.follow.entity;
 
 import com.ecloth.beta.common.entity.BaseEntity;
+import com.ecloth.beta.member.entity.Member;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -14,6 +15,13 @@ import javax.persistence.*;
 @Builder
 @AllArgsConstructor
 @AuditOverride(forClass = BaseEntity.class)
+//@Table(
+//        uniqueConstraints = {
+//        @UniqueConstraint(
+//                name = "relation_id",
+//                columnNames = {"requester", "target"}
+//        )
+//})
 public class Follow extends BaseEntity {
 
     @Id
@@ -21,14 +29,26 @@ public class Follow extends BaseEntity {
     @Column(name = "follow_id", nullable = false)
     private Long followId;
 
-    private Long requesterId;
+    @ManyToOne
+    @JoinColumn(name = "requester_id")
+    private Member requester;
 
-    private Long targetId;
+    @ManyToOne
+    @JoinColumn(name = "target_id")
+    private Member target;
 
-    private boolean followStatus;
+    public void changeRequester(Member requester){
+        this.requester = requester;
+        if (!requester.getFollowList().contains(this)) {
+            requester.getFollowList().add(this);
+        }
+    }
 
-    public void changeFollowStatus(boolean isFollowing) {
-        this.followStatus = isFollowing;
+    public void changeTarget(Member target){
+        this.target = target;
+        if (!target.getFollowerList().contains(this)){
+            target.getFollowerList().add(this);
+        }
     }
 
 }

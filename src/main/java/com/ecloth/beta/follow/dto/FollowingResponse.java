@@ -32,13 +32,13 @@ public class FollowingResponse implements Serializable {
         private long followerCnt;
         private boolean followStatus;
 
-        public static FollowMemberInfo fromEntity(Member target, boolean followStatus) {
+        public static FollowMemberInfo fromEntity(Member member, boolean followStatus) {
             return FollowMemberInfo.builder()
-                    .targetId(target.getMemberId())
-                    .nickname(target.getNickname())
-                    .profileImagePath(target.getProfileImagePath())
-                    .followCnt(target.getFollowCnt())
-                    .followerCnt(target.getFollowerCnt())
+                    .targetId(member.getMemberId())
+                    .nickname(member.getNickname())
+                    .profileImagePath(member.getProfileImagePath())
+                    .followCnt(member.getFollowList().size())
+                    .followerCnt(member.getFollowerList().size())
                     .followStatus(followStatus)
                     .build();
         }
