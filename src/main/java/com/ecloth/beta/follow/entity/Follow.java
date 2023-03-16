@@ -15,13 +15,6 @@ import javax.persistence.*;
 @Builder
 @AllArgsConstructor
 @AuditOverride(forClass = BaseEntity.class)
-//@Table(
-//        uniqueConstraints = {
-//        @UniqueConstraint(
-//                name = "relation_id",
-//                columnNames = {"requester", "target"}
-//        )
-//})
 public class Follow extends BaseEntity {
 
     @Id

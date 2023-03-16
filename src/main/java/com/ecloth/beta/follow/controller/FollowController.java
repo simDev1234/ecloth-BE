@@ -33,7 +33,7 @@ public class FollowController {
     public ResponseEntity<FollowingResponse> following(@ApiIgnore Principal principal,
                                                        @PathVariable Long memberId){
 
-        FollowingResponse response = followService.follow("test@gmail.com", memberId);
+        FollowingResponse response = followService.follow(principal.getName(), memberId);
         return ResponseEntity.ok(response);
 
     }
@@ -42,7 +42,7 @@ public class FollowController {
     public ResponseEntity<Boolean> followingStatus(@ApiIgnore Principal principal,
                                                    @PathVariable Long memberId){
 
-        boolean response = followService.isFollowing("test@gmail.com", memberId);
+        boolean response = followService.isFollowing(principal.getName(), memberId);
         return  ResponseEntity.ok(response);
 
     }
@@ -50,7 +50,7 @@ public class FollowController {
     @GetMapping("/follow")
     public ResponseEntity<FollowingResponse> memberFollowInfo(@ApiIgnore Principal principal){
 
-        FollowingResponse response = followService.findMemberFollowInfo("test@gmail.com");
+        FollowingResponse response = followService.findMemberFollowInfo(principal.getName());
 
         return ResponseEntity.ok(response);
     }
@@ -59,7 +59,7 @@ public class FollowController {
     public ResponseEntity<FollowingResponse> memberFollowInfo(@ApiIgnore Principal principal,
                                                               @PathVariable long memberId){
 
-        FollowingResponse response = followService.findMemberFollowInfo("test@gmail.com", memberId);
+        FollowingResponse response = followService.findMemberFollowInfo(principal.getName(), memberId);
 
         return ResponseEntity.ok(response);
     }
@@ -72,9 +72,9 @@ public class FollowController {
         FollowListResponse response;
 
         if (FOLLOWS.equals(dir)) {
-            response = followService.findFollowList("test@gmail.com", request.getCustomPage());
+            response = followService.findFollowList(principal.getName(), request.getCustomPage());
         } else {
-            response = followService.findFollowerList("test@gmail.com", request.getCustomPage());
+            response = followService.findFollowerList(principal.getName(), request.getCustomPage());
         }
 
         return ResponseEntity.ok(response);
@@ -100,7 +100,7 @@ public class FollowController {
     public ResponseEntity<Void> unfollowing(@ApiIgnore Principal principal,
                                             @PathVariable Long memberId){
 
-        followService.unfollow("test@gmail.com", memberId);
+        followService.unfollow(principal.getName(), memberId);
 
         return ResponseEntity.ok().build();
     }
