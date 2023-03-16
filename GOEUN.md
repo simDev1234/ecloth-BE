@@ -83,14 +83,34 @@ private List<FollowMember> addMemberInfoToFollowResult(Page<Follow> follows) {
     return followMembers;
 }
 ```
-- 콘솔에 출력된 쿼리문 :
+- 콘솔에 출력된 쿼리문 : 
+```java
+Hibernate: 
+    select
+        follow0_.follow_id as follow_i1_0_,
+        follow0_.register_date as register2_0_,
+        follow0_.update_date as update_d3_0_,
+        follow0_.follow_status as follow_s4_0_,
+        follow0_.requester_id as requeste5_0_,
+        follow0_.target_id as target_i6_0_ 
+    from
+        follow follow0_ 
+    order by
+        follow0_.register_date desc limit ? offset ?
+Hibernate: 
+    select
+        count(follow0_.follow_id) as col_0_0_ 
+    from
+        follow follow0_
+```
+  위의 경우 팔로우 데이터가 없는 상태였으나, 실제 로직상으로는 아래를 따른다.
   1. 회원 정보를 두 번 불러온 후, (+2N)
   2. 팔로우 목록을 조회하고 (+N)
   3. 팔로우 목록 수만큼 회원 정보를 조회한다.(+N)
 
 - JMeter에 출력된 결과 : 1만 개의 샘플을 5번의 루프로 돌린 결과
-  1) 하나의 요청당 평균 ms 속도로 처리 되었으며,
-  2) 초당 트랜잭션 수(TPS)는 가장 많을 때 약 개가 나타났다.
+  1) 하나의 요청당 평균 701ms 속도로 처리 되었으며, 오류는 14%
+  2) 초당 트랜잭션 수(TPS)는 가장 많을 때 약 4000개가 나타났다.
 
 [2] 양방향 연관관계가 있는 경우
 - 회원 <-> 팔로우
