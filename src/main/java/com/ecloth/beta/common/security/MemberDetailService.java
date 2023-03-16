@@ -1,4 +1,4 @@
-package com.ecloth.beta.member.security;
+package com.ecloth.beta.common.security;
 
 import com.ecloth.beta.member.entity.Member;
 import com.ecloth.beta.member.exception.ErrorCode;

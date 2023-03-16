@@ -1,4 +1,4 @@
-package com.ecloth.beta.member.jwt;
+package com.ecloth.beta.common.jwt;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,9 +13,6 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
-
-import static com.ecloth.beta.member.jwt.JwtProperties.AUTHORIZATION_HEADER;
-import static com.ecloth.beta.member.jwt.JwtProperties.BEARER_TYPE;
 
 //클라이언트에서 전달된 JWT 토큰을 검증하고, 검증된 정보를 기반으로 인증 객체(Authentication)를 생성하여 Spring Security 컨텍스트에 저장
 @Slf4j
@@ -56,8 +53,8 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
     }
     // Request Header 에서 토큰 정보 추출
     private String resolveToken(HttpServletRequest request) {
-        String bearerToken = request.getHeader(AUTHORIZATION_HEADER);
-        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER_TYPE)) {
+        String bearerToken = request.getHeader(JwtProperties.AUTHORIZATION_HEADER);
+        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(JwtProperties.BEARER_TYPE)) {
             return bearerToken.substring(7);
         }
         return null;
