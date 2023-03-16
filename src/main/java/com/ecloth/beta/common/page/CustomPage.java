@@ -23,4 +23,13 @@ public class CustomPage {
         return page * size - 1;
     }
 
+    public static CustomPage of(CustomPage requestPage, int realSize){
+        return CustomPage.builder()
+                .page(requestPage.getPage())
+                .size(realSize)
+                .sortBy(requestPage.sortBy)
+                .sortOrder(requestPage.getSortOrder())
+                .build();
+    }
+
 }

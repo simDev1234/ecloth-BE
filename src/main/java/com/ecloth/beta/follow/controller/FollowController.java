@@ -12,7 +12,15 @@ import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 import java.security.Principal;
 import java.util.Locale;
+import static com.ecloth.beta.follow.type.PointDirection.FOLLOWS;
 
+/**
+ * 팔로우 API
+ * - 팔로우 or 언팔로우 요청
+ * - 팔로우 상태 조회
+ * - 회원의 팔로우수/팔로워수 조회
+ * - 회원의 팔로우/팔로워 목록 조회
+ */
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/member")
@@ -25,60 +33,74 @@ public class FollowController {
     public ResponseEntity<FollowingResponse> following(@ApiIgnore Principal principal,
                                                        @PathVariable Long memberId){
 
-        //String requesterEmail = Objects.requireNonNull(principal.getName());
-        FollowingResponse response = followService.createFollow("test@gmail.com", memberId);
+        FollowingResponse response = followService.follow("test@gmail.com", memberId);
         return ResponseEntity.ok(response);
 
     }
 
-    @GetMapping("/follow")
-    public ResponseEntity<FollowingResponse> myFollowDetail(@ApiIgnore Principal principal){
+    @GetMapping("/{memberId}/follow")
+    public ResponseEntity<Boolean> followingStatus(@ApiIgnore Principal principal,
+                                                   @PathVariable Long memberId){
 
-        //FollowingResponse response = followService.findFollowDetailOfMine(principal.getName());
-        FollowingResponse response = followService.findMyFollowDetail("test@gmail.com");
+        boolean response = followService.isFollowing("test@gmail.com", memberId);
+        return  ResponseEntity.ok(response);
+
+    }
+
+    @GetMapping("/follow")
+    public ResponseEntity<FollowingResponse> memberFollowInfo(@ApiIgnore Principal principal){
+
+        FollowingResponse response = followService.findMemberFollowInfo("test@gmail.com");
 
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{memberId}/follow")
-    public ResponseEntity<FollowingResponse> followDetailOfMember(@ApiIgnore Principal principal,
-                                                                  @PathVariable long memberId){
+    public ResponseEntity<FollowingResponse> memberFollowInfo(@ApiIgnore Principal principal,
+                                                              @PathVariable long memberId){
 
-        FollowingResponse response
-                //  = followService.findFollowCountAndMyFollowingStatusOfTarget(principal.getName(), requesterId);
-                = followService.findFollowDetailOfMember("test@gmail.com", memberId);
+        FollowingResponse response = followService.findMemberFollowInfo("test@gmail.com", memberId);
 
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/follows")
-    public ResponseEntity<FollowListResponse> myFollowList(@ApiIgnore Principal principal,
-                                                           FollowListRequest request){
+    public ResponseEntity<FollowListResponse> memberFollowList(@ApiIgnore Principal principal,
+                                                               FollowListRequest request){
 
-//        FollowListResponse response = followService.findFollowListOfMine(principal.getName(),
-//                PointDirection.valueOf(request.getPointDirection().toUpperCase(Locale.ROOT)), request.getPage());
+        PointDirection dir = PointDirection.valueOf(request.getDir().toUpperCase(Locale.ROOT));
+        FollowListResponse response;
 
-        FollowListResponse response = followService.findMyFollowList("test@gmail.com",
-                PointDirection.valueOf(request.getDir().toUpperCase(Locale.ROOT)), request.getCustomPage());
+        if (FOLLOWS.equals(dir)) {
+            response = followService.findFollowList("test@gmail.com", request.getCustomPage());
+        } else {
+            response = followService.findFollowerList("test@gmail.com", request.getCustomPage());
+        }
 
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{memberId}/follows")
-    public ResponseEntity<FollowListResponse> followListOfMember(@PathVariable long memberId,
+    public ResponseEntity<FollowListResponse> memberFollowList(@PathVariable long memberId,
                                                                  FollowListRequest request){
 
-        FollowListResponse response = followService.findFollowListOfMember(memberId,
-                PointDirection.valueOf(request.getDir().toUpperCase(Locale.ROOT)), request.getCustomPage());
+        PointDirection dir = PointDirection.valueOf(request.getDir().toUpperCase(Locale.ROOT));
+        FollowListResponse response;
+
+        if (FOLLOWS.equals(dir)) {
+            response = followService.findFollowList(memberId, request.getCustomPage());
+        } else {
+            response = followService.findFollowerList(memberId, request.getCustomPage());
+        }
 
         return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{memberId}/follow")
-    public ResponseEntity<Void> followStop(@ApiIgnore Principal principal,
-                                           @PathVariable Long memberId){
+    public ResponseEntity<Void> unfollowing(@ApiIgnore Principal principal,
+                                            @PathVariable Long memberId){
 
-        followService.stopFollowing(principal.getName(), memberId);
+        followService.unfollow("test@gmail.com", memberId);
 
         return ResponseEntity.ok().build();
     }

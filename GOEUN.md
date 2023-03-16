@@ -8,6 +8,82 @@
   [2] 양방향의 연관관계가 있는 경우
   [3] 복합키를 사용한 경우
 ```
+
+[1] 연관관계가 없는 경우
+- 회원 | 팔로우 각각 별도로 작업
+```java
+@Entity
+// 어노테이션 생략
+public class Member {
+
+    @Id
+    @GeneratedValue
+    @Column(name = "member_id")
+    private Long id;
+
+    private long followCnt;
+    private long followerCnt;
+
+}
+```
+```java
+@Entity
+// 어노테이션 생략
+public class Follow {
+
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "follow_id")
+  private Long id;
+
+  private Long requesterId;
+  private Long targetId;
+  private boolean followStatus;
+
+}
+```
+- 서비스에서 회원 팔로우 목록을 가져오는 서비스
+```java
+public FollowList.Response getFollowList(String requesterEmail, FollowList.Request request) {
+
+    Member requester = memberRepository.findByEmail(requesterEmail)
+            .orElseThrow(() -> new FollowException(FOLLOW_REQUESTER_NOT_FOUND));
+
+    PageRequest pageRequest = PageRequest.of(request.getPageNumber() - 1, request.getRecordSize()
+            , Sort.Direction.valueOf(request.getSortOrder().toUpperCase(Locale.ROOT)), request.getSortBy());
+
+    PointDirection pointDirection = PointDirection.valueOf(request.getPointDirection());
+
+    Page<Follow> pageResult;
+    List<FollowMember> followMembers;
+    if (FOLLOWS.equals(pointDirection)) {
+        pageResult = followRepository.findAll(pageRequest);
+        followMembers = addMemberInfoToFollowResult(pageResult);
+    } else  {
+        pageResult = followRepository.findAllByTargetId(requester.getId(), pageRequest);
+        followMembers = addMemberInfoToFollowResult(pageResult);
+    }
+
+    return FollowList.Response.fromEntity(requester.getId(), request, pageResult, followMembers);
+}
+
+private List<FollowMember> addMemberInfoToFollowResult(Page<Follow> follows) {
+
+    List<FollowMember> followMembers = new ArrayList<>();
+
+    for (Follow follow : follows.getContent()) {
+        Member member = memberRepository.findById(follow.getTargetId())
+                .orElseThrow(() -> new FollowException(FOLLOW_TARGET_NOT_FOUND));
+
+        FollowMember followMember = FollowMember.fromEntity(member);
+        followMember.setFollowStatus(follow.isFollowStatus());
+        followMembers.add(followMember);
+    }
+
+    return followMembers;
+}
+```
+
 [2] 양방향 연관관계가 있는 경우
 - 회원 <-> 팔로우
 ```java
@@ -60,15 +136,26 @@ public class Follow {
     }
 }
 ```
-- 서비스에서 회원의 팔로우 정보를 가져오는 메소드
+- 서비스에서 회원 팔로우 목록을 가져오는 메소드
 ```java
-public FollowListResponse findFollowListOfMember(Long memberId, PointDirection dir, CustomPage requestPage) {
+public FollowListResponse findFollowList(String email, CustomPage requestPage) {
 
-    Member member = memberRepository.findById(memberId)
-            .orElseThrow(() -> new RuntimeException("Member Not Found"));
+    Member member = memberRepository.findByEmail(email)
+    .orElseThrow(() -> new RuntimeException("Member Not Found"));
+    
+    List<MemberShortInfo> followList = findFollowingMemberShortList(requestPage, member);
+    return FollowListResponse.fromEntity(FOLLOWS, requestPage, member, followList);
+}
 
-    return FollowListResponse.fromEntity(dir, requestPage, member);
+private List<MemberShortInfo> findFollowingMemberShortList(CustomPage requestPage, Member member) {
 
+    List<Follow> myFollowList = member.getFollowList();
+    List<Follow> subFollowList = getSubFollowListByPage(requestPage, myFollowList);
+
+    return subFollowList.stream()
+                        .map(Follow::getTarget)
+                        .map(MemberShortInfo::fromEntity)
+                        .collect(Collectors.toList());
 }
 ```
 - 콘솔에 출력된 쿼리문 : 

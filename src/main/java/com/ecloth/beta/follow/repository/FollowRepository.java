@@ -14,11 +14,4 @@ public interface FollowRepository extends JpaRepository<Follow, Long> {
 
     Optional<Follow> findByRequesterAndTarget(Member requester, Member target);
 
-    //Optional<Follow> findByRequester(Member member);
-
-    //Page<Follow> findAllByTarget(Member target, PageRequest toPageRequest);
-    //Optional<Follow> findByRequesterIdAndTargetId(Long requesterId, Long targetId);
-
-    //Page<Follow> findAllByTargetId(Long targetId, Pageable pageable);
-
 }
