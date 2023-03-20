@@ -3,6 +3,7 @@ package com.ecloth.beta.member.controller;
 import com.ecloth.beta.member.dto.MemberRequest;
 import com.ecloth.beta.member.entity.Member;
 import com.ecloth.beta.member.service.MemberService;
+import io.swagger.annotations.Api;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -15,6 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 @RestController
 @RequestMapping("/api")
 @AllArgsConstructor
+@Api(tags = "회원 API" )
 public class MemberController {
 
     private final MemberService memberService;

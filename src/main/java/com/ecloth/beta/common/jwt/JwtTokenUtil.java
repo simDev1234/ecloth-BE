@@ -9,7 +9,7 @@ import java.time.Duration;
 @Service
 @RequiredArgsConstructor
 public class JwtTokenUtil {
-    private final RedisTemplate redisTemplate;
+    private final RedisTemplate<String, String> redisTemplate;;
 
     // 로그아웃시 RefreshToken 삭제
     public void deleteRefreshToken(String email) {
