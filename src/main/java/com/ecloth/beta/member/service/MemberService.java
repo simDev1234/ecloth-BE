@@ -38,7 +38,7 @@ public class MemberService {
     private final JavaMailSenderComponent javaMailSenderComponent;
     private final JwtTokenProvider jwtTokenProvider;
     private final JwtTokenUtil jwtTokenUtil;
-    private final RedisTemplate redisTemplate;
+    private final RedisTemplate<String,String> redisTemplate;
 
     @Transactional
     public Member register(MemberRequest.Register RegisterDto) {
@@ -142,7 +142,6 @@ public class MemberService {
         return headers;
     }
 
-    @Transactional
     public void logout(String accessToken) {
         // "Bearer " 제거
         accessToken = accessToken.replace("Bearer ", "");
