@@ -16,7 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 @RestController
 @RequestMapping("/api")
 @AllArgsConstructor
-@Api(tags = "회원 API" )
+@Api(tags = "회원 API")
 public class MemberController {
 
     private final MemberService memberService;
