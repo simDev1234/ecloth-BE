@@ -1,7 +1,7 @@
 package com.ecloth.beta.follow.dto;
 
 import com.ecloth.beta.member.entity.Member;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.*;
 import java.io.Serializable;
@@ -9,19 +9,19 @@ import java.io.Serializable;
 @AllArgsConstructor
 @Builder
 @Getter
-@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class FollowingResponse implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    private FollowMemberInfo followMemberInfo;
+    private MemberFollowInfo memberFollowInfo;
 
     @AllArgsConstructor
     @NoArgsConstructor
     @Getter
     @Setter
     @Builder
-    @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
-    public static class FollowMemberInfo implements Serializable {
+    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+    public static class MemberFollowInfo implements Serializable {
 
         private static final long serialVersionUID = 1L;
 
@@ -32,8 +32,8 @@ public class FollowingResponse implements Serializable {
         private long followerCnt;
         private boolean followStatus;
 
-        public static FollowMemberInfo fromEntity(Member member, boolean followStatus) {
-            return FollowMemberInfo.builder()
+        public static MemberFollowInfo fromEntity(Member member, boolean followStatus) {
+            return MemberFollowInfo.builder()
                     .targetId(member.getMemberId())
                     .nickname(member.getNickname())
                     .profileImagePath(member.getProfileImagePath())
@@ -44,8 +44,10 @@ public class FollowingResponse implements Serializable {
         }
     }
 
-    public static FollowingResponse fromEntity(Member target, boolean followStatus){
-        return new FollowingResponse(FollowMemberInfo.fromEntity(target, followStatus));
+    public static FollowingResponse fromEntity(Member member, boolean followStatus){
+        return new FollowingResponse(MemberFollowInfo.fromEntity(member, followStatus));
     }
+
+
 
 }

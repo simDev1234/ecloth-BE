@@ -3,11 +3,12 @@ package com.ecloth.beta.follow.dto;
 import com.ecloth.beta.common.page.CustomPage;
 import com.ecloth.beta.follow.type.PointDirection;
 import com.ecloth.beta.member.entity.Member;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+
 import java.io.Serializable;
 import java.util.List;
 import java.util.Locale;
@@ -15,7 +16,7 @@ import java.util.Locale;
 @AllArgsConstructor
 @Builder
 @Getter
-@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class FollowListResponse implements Serializable{
 
     private static final long serialVersionUID = 1L;
@@ -29,7 +30,7 @@ public class FollowListResponse implements Serializable{
     @AllArgsConstructor
     @Getter
     @Builder
-    @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
+    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
     public static class MemberShortInfo {
 
         private Long targetId;

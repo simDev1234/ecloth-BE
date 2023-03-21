@@ -9,7 +9,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.envers.AuditOverride;
+
 import javax.persistence.*;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -19,7 +21,9 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @AuditOverride(forClass = BaseEntity.class)
-public class Member extends BaseEntity {
+public class Member extends BaseEntity implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     @Id
     @Column(name = "member_id")
@@ -53,7 +57,7 @@ public class Member extends BaseEntity {
     private String latitude;
     private String longitude;
 
-    // follow & follower list
+    // follow & follower
     @OneToMany(mappedBy = "requester")
     private List<Follow> followList;
     @OneToMany(mappedBy = "target")
@@ -61,4 +65,5 @@ public class Member extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     private MemberRole memberRole;
+
 }

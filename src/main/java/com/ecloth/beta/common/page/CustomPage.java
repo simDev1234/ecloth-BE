@@ -1,12 +1,13 @@
 package com.ecloth.beta.common.page;
 
-import lombok.*;
-import org.springframework.data.domain.Page;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-@Setter
 @Builder
 public class CustomPage {
 
@@ -14,14 +15,6 @@ public class CustomPage {
     private int size;
     private String sortBy;
     private String sortOrder;
-
-    public int getStartIdx(){
-        return getEndIdx() - size + 1;
-    }
-
-    public int getEndIdx(){
-        return page * size - 1;
-    }
 
     public static CustomPage of(CustomPage requestPage, int realSize){
         return CustomPage.builder()
@@ -31,5 +24,4 @@ public class CustomPage {
                 .sortOrder(requestPage.getSortOrder())
                 .build();
     }
-
 }
