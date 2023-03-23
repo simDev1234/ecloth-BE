@@ -26,8 +26,8 @@ public class FollowListResponse implements Serializable{
     private String pointDirection;
     private long total;
     @Builder.Default
-    private CustomPage page = new CustomPage(1, 5, "createdDate", "dsc");
-    private List<MemberShortInfo> followList;
+    private CustomPage page = new CustomPage(1, 5, "registerDate", "DESC");
+    private List<MemberShortInfo> followList = new ArrayList<>();
 
     @AllArgsConstructor
     @Getter
@@ -54,7 +54,6 @@ public class FollowListResponse implements Serializable{
                 .total(0)
                 .page(CustomPage.of(requestPage, 0))
                 .pointDirection(dir.name().toUpperCase(Locale.ROOT))
-                .followList(new ArrayList<>())
                 .build();
     }
 
