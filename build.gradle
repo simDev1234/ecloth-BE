@@ -59,9 +59,6 @@ dependencies {
     // Redis
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
-    // JsonObject
-    implementation 'org.json:json:20220924'
-
     // OAuth2
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 }
