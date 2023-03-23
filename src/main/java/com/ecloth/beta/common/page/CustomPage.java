@@ -24,4 +24,13 @@ public class CustomPage {
                 .sortOrder(requestPage.getSortOrder())
                 .build();
     }
+
+    public int getStartIdx(){
+        return this.size * (this.page - 1);
+    }
+
+    public int getEndIdx(long total){
+        int endIdx = getStartIdx() + this.size;
+        return (int) Math.min(total, endIdx);
+    }
 }

@@ -1,6 +1,7 @@
 package com.ecloth.beta.follow.dto;
 
 import com.ecloth.beta.common.page.CustomPage;
+import com.ecloth.beta.follow.entity.Follow;
 import com.ecloth.beta.follow.type.PointDirection;
 import com.ecloth.beta.member.entity.Member;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
@@ -10,8 +11,10 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
 
 @AllArgsConstructor
 @Builder
@@ -20,7 +23,6 @@ import java.util.Locale;
 public class FollowListResponse implements Serializable{
 
     private static final long serialVersionUID = 1L;
-    private Long memberId;
     private String pointDirection;
     private long total;
     @Builder.Default
@@ -31,7 +33,7 @@ public class FollowListResponse implements Serializable{
     @Getter
     @Builder
     @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-    public static class MemberShortInfo {
+    public static class MemberShortInfo implements Serializable{
 
         private Long targetId;
         private String nickname;
@@ -47,27 +49,26 @@ public class FollowListResponse implements Serializable{
 
     }
 
-    public static FollowListResponse fromEntity(Long memberId, PointDirection dir,
-                                                long total, CustomPage resultPage,
-                                                List<MemberShortInfo> followList) {
+    public static FollowListResponse fromEmpty(PointDirection dir, CustomPage requestPage) {
         return FollowListResponse.builder()
-                .memberId(memberId)
-                .total(total)
-                .page(resultPage)
+                .total(0)
+                .page(CustomPage.of(requestPage, 0))
                 .pointDirection(dir.name().toUpperCase(Locale.ROOT))
-                .followList(followList)
+                .followList(new ArrayList<>())
                 .build();
     }
 
     public static FollowListResponse fromEntity(PointDirection dir, CustomPage requestPage,
-                                                 Member member, List<MemberShortInfo> followList) {
+                                                List<MemberShortInfo> followList) {
+
         CustomPage resultPage = CustomPage.of(requestPage, followList.size());
 
-        return FollowListResponse.fromEntity(
-                member.getMemberId(),
-                dir, followList.size(), resultPage,
-                followList
-        );
+        return FollowListResponse.builder()
+                .total(followList.size())
+                .page(resultPage)
+                .pointDirection(dir.name().toUpperCase(Locale.ROOT))
+                .followList(followList)
+                .build();
     }
 
 }

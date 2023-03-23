@@ -12,6 +12,7 @@ import com.ecloth.beta.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -19,6 +20,11 @@ import static com.ecloth.beta.follow.exception.ErrorCode.FOLLOW_REQUESTER_NOT_FO
 import static com.ecloth.beta.follow.type.PointDirection.FOLLOWERS;
 import static com.ecloth.beta.follow.type.PointDirection.FOLLOWS;
 
+/**
+ * 팔로우 기능
+ * - Requester : 팔로우를 요청한 회원
+ * - Target : 팔로우 요청을 받은 회원
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -30,21 +36,21 @@ public class FollowService {
     // 팔로우
     public FollowingResponse follow(String currentLoggedInMemberEmail, Long toMemberId) {
 
-        Member fromMember = memberRepository.findByEmail(currentLoggedInMemberEmail)
+        Member requester = memberRepository.findByEmail(currentLoggedInMemberEmail)
                 .orElseThrow(() -> new RuntimeException("Member Not Found"));
 
-        Member toMember = memberRepository.findById(toMemberId)
+        Member target = memberRepository.findById(toMemberId)
                 .orElseThrow(() -> new RuntimeException("Member Not Found"));
 
         if (!isFollowing(currentLoggedInMemberEmail, toMemberId)) {
-            followRepository.save(Follow.builder().requester(fromMember).target(toMember).build());
+            followRepository.save(Follow.builder().requester(requester).target(target).build());
         }
 
-        return FollowingResponse.fromEntity(toMember, true);
+        return FollowingResponse.fromEntity(target, true);
     }
 
     // 팔로우 상태 조회
-    public boolean isFollowing(String currentLoggedInMemberEmail, Long toMemberId){
+    public boolean isFollowing(String currentLoggedInMemberEmail, Long toMemberId) {
 
         Optional<Follow> optionalFollow
                 = followRepository.findByRequesterEmailAndTargetId(currentLoggedInMemberEmail, toMemberId);
@@ -52,7 +58,7 @@ public class FollowService {
         return optionalFollow.isPresent();
     }
 
-    // 회원의 닉네임, 프로필, 팔로우수, 팔로워수 정보 조회
+    // 로그인 회원의 닉네임, 프로필, 팔로우수, 팔로워수 정보 조회
     public FollowingResponse findMemberFollowInfo(String currentLoggedInMemberEmail) {
 
         Member member = memberRepository.findByEmail(currentLoggedInMemberEmail)
@@ -61,6 +67,7 @@ public class FollowService {
         return FollowingResponse.fromEntity(member, true);
     }
 
+    // 특정 회원의 닉네임, 프로필, 팔로우수, 팔로워수 정보 조회
     public FollowingResponse findMemberFollowInfo(String currentLoggedInMemberEmail, Long memberId) {
 
         Member member = memberRepository.findById(memberId)
@@ -76,47 +83,60 @@ public class FollowService {
     // 로그인 회원이 팔로우하고 있는 회원 목록
     public FollowListResponse findFollowList(String currentLoggedInMemberEmail, CustomPage requestPage) {
 
-        Member member = memberRepository.findByEmail(currentLoggedInMemberEmail)
-                .orElseThrow(() -> new FollowException(FOLLOW_REQUESTER_NOT_FOUND));
+        List<Follow> followList = followRepository.findFollowListByRequesterEmail(currentLoggedInMemberEmail);
 
-        List<MemberShortInfo> followList = findFollowingMemberShortList(requestPage, member);
-        return FollowListResponse.fromEntity(FOLLOWS, requestPage, member, followList);
+        if (CollectionUtils.isEmpty(followList)) {
+            return FollowListResponse.fromEmpty(FOLLOWS, requestPage);
+        }
+
+        List<MemberShortInfo> subFollowList = getSubFollowListByPage(requestPage, followList);
+        return FollowListResponse.fromEntity(FOLLOWS, requestPage, subFollowList);
     }
 
     // 로그인 회원을 팔로우하고 있는 회원 목록
-    public FollowListResponse findFollowerList(String currentLoggedInMemberEmail, CustomPage requestPage){
+    public FollowListResponse findFollowerList(String currentLoggedInMemberEmail, CustomPage requestPage) {
 
-        Member member = memberRepository.findByEmail(currentLoggedInMemberEmail)
-                .orElseThrow(() -> new RuntimeException("Member Not Found"));
+        List<Follow> followerList = followRepository.findFollowerListByTargetEmail(currentLoggedInMemberEmail);
 
-        List<MemberShortInfo> followerList = findFollowerMemberShortList(requestPage, member);
-        return FollowListResponse.fromEntity(FOLLOWERS, requestPage, member, followerList);
+        if (CollectionUtils.isEmpty(followerList)) {
+            return FollowListResponse.fromEmpty(FOLLOWERS, requestPage);
+        }
+
+        List<MemberShortInfo> subFollowerList = getSubFollowerListByPage(requestPage, followerList);
+        return FollowListResponse.fromEntity(FOLLOWERS, requestPage, subFollowerList);
     }
 
     // 특정 회원이 팔로우하고 있는 회원 목록
-    public FollowListResponse findFollowList(Long memberId, CustomPage requestPage){
+     public FollowListResponse findFollowList(Long memberId, CustomPage requestPage) {
 
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new RuntimeException("Member Not Found"));
+        List<Follow> followList = followRepository.findFollowListByRequesterId(memberId);
 
-        List<MemberShortInfo> followList = findFollowingMemberShortList(requestPage, member);
-        return FollowListResponse.fromEntity(FOLLOWERS, requestPage, member, followList);
+        if (CollectionUtils.isEmpty(followList)) {
+            return FollowListResponse.fromEmpty(FOLLOWS, requestPage);
+        }
+
+        List<MemberShortInfo> subFollowList = getSubFollowListByPage(requestPage, followList);
+        return FollowListResponse.fromEntity(FOLLOWS, requestPage, subFollowList);
     }
 
     // 특정 회원을 팔로우하고 있는 회원 목록
-    public FollowListResponse findFollowerList(Long memberId, CustomPage requestPage){
+    public FollowListResponse findFollowerList(Long memberId, CustomPage requestPage) {
 
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new RuntimeException("Member Not Found"));
+        List<Follow> followerList = followRepository.findFollowerListByTargetId(memberId);
 
-        List<MemberShortInfo> followerList = findFollowerMemberShortList(requestPage, member);
-        return FollowListResponse.fromEntity(FOLLOWERS, requestPage, member, followerList);
+        if (CollectionUtils.isEmpty(followerList)) {
+            return FollowListResponse.fromEmpty(FOLLOWERS, requestPage);
+        }
+
+        List<MemberShortInfo> subFollowerList = getSubFollowerListByPage(requestPage, followerList);
+        return FollowListResponse.fromEntity(FOLLOWERS, requestPage, subFollowerList);
+
     }
 
-    private List<MemberShortInfo> findFollowingMemberShortList(CustomPage requestPage, Member member) {
+    private List<MemberShortInfo> getSubFollowListByPage(CustomPage requestPage, List<Follow> followList) {
 
-        List<Follow> myFollowList = member.getFollowList();
-        List<Follow> subFollowList = getSubListByPage(requestPage, myFollowList);
+        long total = followList.size();
+        List<Follow> subFollowList = followList.subList(requestPage.getStartIdx(), requestPage.getEndIdx(total));
 
         return subFollowList.stream()
                 .map(Follow::getTarget)
@@ -124,34 +144,21 @@ public class FollowService {
                 .collect(Collectors.toList());
     }
 
-    private List<MemberShortInfo> findFollowerMemberShortList(CustomPage requestPage, Member member) {
+    private List<MemberShortInfo> getSubFollowerListByPage(CustomPage requestPage, List<Follow> followList) {
 
-        List<Follow> myFollowerList = member.getFollowerList();
-        List<Follow> subFollowerList = getSubListByPage(requestPage, myFollowerList);
+        long total = followList.size();
+        List<Follow> subFollowList = followList.subList(requestPage.getStartIdx(), requestPage.getEndIdx(total));
 
-        return subFollowerList.stream()
+        return subFollowList.stream()
                 .map(Follow::getRequester)
                 .map(MemberShortInfo::fromEntity)
                 .collect(Collectors.toList());
     }
 
-    private List<Follow> getSubListByPage(CustomPage requestPage, List<Follow> myFollowList) {
-
-        long total = myFollowList.size();
-        int endIdx = requestPage.getPage() * requestPage.getSize() - 1;
-        int fromIdx = endIdx - requestPage.getSize() + 1;
-        int toIdx = (int) Math.min(total, endIdx);
-
-        return myFollowList.subList(fromIdx, toIdx);
-    }
-
     // 언팔로우
     public void unfollow(String email, Long targetId) {
-        Optional<Follow> optionalFollow = followRepository.findByRequesterEmailAndTargetId(email, targetId);
-
-        if (optionalFollow.isPresent()) {
-            followRepository.delete(optionalFollow.get());
-        }
+        followRepository.findByRequesterEmailAndTargetId(email, targetId)
+                        .ifPresent(followRepository::delete);
     }
 
 }

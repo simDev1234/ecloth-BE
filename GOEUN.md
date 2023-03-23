@@ -1,4 +1,4 @@
-# 트러블 슈팅
+# 1. 트러블 슈팅
 ## ISSUE 1. member cannot be cast to class
 ```java
 class com.ecloth.beta.member.entity.member cannot be cast to class java.io.serializable
@@ -6,16 +6,16 @@ class com.ecloth.beta.member.entity.member cannot be cast to class java.io.seria
 - 원인 : 회원 엔터티의 크기가 너무 커져서 Json으로 직렬화가 안 되고 있다.
 - 해결 : Serializable을 implements하고, private final static long serialVersionUID = 1L 을 붙여줬다.
 
-# 쿼리 분석
+# 2. 쿼리 분석
 ```
 - 목적 : 팔로우 목록 조회 속도 최적화 
 - 방법 : 세가지 방식의 쿼리문을 비교하고 JMeter를 통해 부하 테스트
-  [1] 연관관계가 없는 경우
-  [2] 양방향의 연관관계가 있는 경우
-  [3] 
+  [1] 연관관계 없이 회원 id를 통해 팔로우 목록을 조회하는 경우 
+  [2] 회원 <-> 팔로우 양방향 연관관계에서 회원의 팔로우 목록을 조회하는 경우 
+  [3] 회원 <-> 팔로우 양방향 연관관계에서 fetch join으로 회원의 팔로우 목록을 조회하는 경우
 ```
 
-[1] 연관관계가 없는 경우
+### [1] 연관관계 없이 회원 id를 통해 팔로우 목록을 조회하는 경우
 - 회원 | 팔로우 각각 별도로 작업
 ```java
 @Entity
@@ -95,11 +95,11 @@ private List<FollowMember> addMemberInfoToFollowResult(Page<Follow> follows) {
 - 위의 경우 총 1 x N x M 의 쿼리를 사용한다.
   1. 회원 정보를 불러온 후, (1)
   2. 팔로우 목록을 조회하고 (N)
-  3. 팔로우 목록 수만큼 회원 정보를 조회한다.(M)
+  3. 팔로우 목록 수만큼 회원 정보를 조회하고 팔로우, 팔로워 카운트를 올린다.(M)
 - 결론 : 너무 많은 쿼리문을 반복적으로 생성하며, 객체 지향적인 코드라 보기 어려움
 - 대안 : JPA를 통해 회원 <-> 팔로우의 양방향 연관관계를 생성한다. 
 
-[2] 양방향 연관관계가 있는 경우
+### [2] 회원 <-> 팔로우 양방향 연관관계에서 회원의 팔로우 목록을 조회하는 경우
 - 회원 <-> 팔로우
 ```java
 @Entity
@@ -249,3 +249,80 @@ Hibernate:
       : TCP 연결을 위한 소켓 작업이 한 번에 다수가 몰리면서 시스템 리소스가 소진되어 나타나는 현상 (윈도우 디폴트 1024-5000 소진)
       ㄴ 해결 방법 : 부하 분산을 통한 원인 방지 (현재 단계에서는 불필요)
 ``` 
+
+### [3] 회원 <-> 팔로우 양방향 연관관계에서 fetch join으로 회원의 팔로우 목록을 조회하는 경우
+```java
+ @Query("select f from Follow f join fetch f.target where f.requester.memberId = :memberId")
+    List<Follow> findFollowListByRequesterId(Long memberId);
+```
+- 쿼리문
+```java
+Hibernate: 
+    select
+        follow0_.follow_id as follow_i1_0_0_,
+        member1_.member_id as member_i1_1_1_,
+        follow0_.register_date as register2_0_0_,
+        follow0_.update_date as update_d3_0_0_,
+        follow0_.requester_email as requeste4_0_0_,
+        follow0_.target_id as target_i5_0_0_,
+        member1_.register_date as register2_1_1_,
+        member1_.update_date as update_d3_1_1_,
+        member1_.email as email4_1_1_,
+        member1_.email_auth_code as email_au5_1_1_,
+        member1_.email_auth_date as email_au6_1_1_,
+        member1_.latitude as latitude7_1_1_,
+        member1_.longitude as longitud8_1_1_,
+        member1_.member_role as member_r9_1_1_,
+        member1_.member_status as member_10_1_1_,
+        member1_.nickname as nicknam11_1_1_,
+        member1_.password as passwor12_1_1_,
+        member1_.password_reset_code as passwor13_1_1_,
+        member1_.password_reset_request_date as passwor14_1_1_,
+        member1_.phone as phone15_1_1_,
+        member1_.profile_image_path as profile16_1_1_ 
+    from
+        follow follow0_ 
+    inner join
+        member member1_ 
+            on follow0_.target_id=member1_.member_id cross 
+    join
+        member member2_ 
+    where
+        follow0_.requester_email=member2_.email 
+        and member2_.member_id=?
+Hibernate: 
+    select
+        member0_.member_id as member_i1_1_0_,
+        member0_.register_date as register2_1_0_,
+        member0_.update_date as update_d3_1_0_,
+        member0_.email as email4_1_0_,
+        member0_.email_auth_code as email_au5_1_0_,
+        member0_.email_auth_date as email_au6_1_0_,
+        member0_.latitude as latitude7_1_0_,
+        member0_.longitude as longitud8_1_0_,
+        member0_.member_role as member_r9_1_0_,
+        member0_.member_status as member_10_1_0_,
+        member0_.nickname as nicknam11_1_0_,
+        member0_.password as passwor12_1_0_,
+        member0_.password_reset_code as passwor13_1_0_,
+        member0_.password_reset_request_date as passwor14_1_0_,
+        member0_.phone as phone15_1_0_,
+        member0_.profile_image_path as profile16_1_0_ 
+    from
+        member member0_ 
+    where
+        member0_.email=?
+[2023-03-23 18:26:13.042] [INFO ] [http-nio-8080-exec-201] com.ecloth.beta.follow.service.FollowService FollowService.findFollowList : 회원 1의 팔로우 수는 2
+
+```
+- JMeter 테스트 결과
+
+![img.png](.github/img/jmeter10.png)
+
+```
+ 결과 : 
+ - 트래픽 수가 1만명 일 때,
+   - 처리 속도는 평균 450ms, 오류 00%, 처리량 1853.6 TPS
+ - 트래픽 수가 5천명 일 때,
+   - 처리 속도는 평균 584ms, 오류 00%, 처리량 2193.9 TPS
+```

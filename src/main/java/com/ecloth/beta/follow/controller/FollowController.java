@@ -8,8 +8,6 @@ import com.ecloth.beta.follow.type.PointDirection;
 import io.swagger.annotations.Api;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 import java.security.Principal;
@@ -60,10 +58,6 @@ public class FollowController {
     @GetMapping("/{memberId}/follow")
     public ResponseEntity<FollowingResponse> memberFollowInfo(@ApiIgnore Principal principal,
                                                               @PathVariable long memberId){
-
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-
-        System.out.println(email);
 
         FollowingResponse response = followService.findMemberFollowInfo(principal.getName(), memberId);
 
