@@ -3,7 +3,8 @@ package com.ecloth.beta.member.service;
 import com.ecloth.beta.common.jwt.JwtTokenProvider;
 import com.ecloth.beta.common.jwt.JwtTokenUtil;
 import com.ecloth.beta.member.component.JavaMailSenderComponent;
-import com.ecloth.beta.member.dto.InfoMeRequest;
+import com.ecloth.beta.member.dto.InfoMeResponse;
+import com.ecloth.beta.member.dto.InfoMeUpdateRequest;
 import com.ecloth.beta.member.dto.MemberRequest;
 import com.ecloth.beta.member.dto.Token;
 import com.ecloth.beta.member.entity.Member;
@@ -17,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -216,7 +218,7 @@ public class MemberService {
     }
 
     // 회원 정보 조회
-    public InfoMeRequest getInfoMe() {
+    public InfoMeResponse getInfoMe() {
         // SecurityContext 에서 현재 인증 객체 가져오기
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         // User email  가져오기
@@ -225,7 +227,7 @@ public class MemberService {
         if (member.isEmpty()) {
             throw new MemberException(ErrorCode.NOT_FOUND_USER);
         }
-        return InfoMeRequest.builder()
+        return InfoMeResponse.builder()
                 .email(member.get().getEmail())
                 .nickname(member.get().getNickname())
                 .phone(member.get().getPhone())
@@ -233,4 +235,16 @@ public class MemberService {
                 .build();
     }
 
+    // 회원 정보 업데이트
+    public void updateInfoMe(InfoMeUpdateRequest request) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        Optional<Member> memberOptional = memberRepository.findByEmail(email);
+
+        if (memberOptional.isPresent()) {
+            Member member = memberOptional.get();
+            member.update(request, passwordEncoder);
+            memberRepository.save(member);
+        }
+    }
 }
