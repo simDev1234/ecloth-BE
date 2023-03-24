@@ -59,8 +59,8 @@ dependencies {
     // Redis
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
-    // OAuth2
-    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+    // JsonObject
+    implementation 'org.json:json:20220924'
 }
 
 tasks.named('test') {
