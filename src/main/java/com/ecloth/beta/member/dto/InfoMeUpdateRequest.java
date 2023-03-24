@@ -9,5 +9,6 @@ public class InfoMeUpdateRequest {
     private String nickname;
     private String phone;
     private String password;
+    private String newPassword;
     private String profileImagePath;
 }

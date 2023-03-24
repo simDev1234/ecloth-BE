@@ -30,8 +30,8 @@ public class JwtTokenProvider {
     private String secretKey;
 
     // 토큰생성
-    public Token generateToken(String email) {
-        MemberDetails memberDetails = memberDetailService.loadUserByUsername(email);
+    public Token generateToken(Long id) {
+        MemberDetails memberDetails = memberDetailService.loadUserByUsername(String.valueOf(id));
         List<String> authorities = memberDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
@@ -71,7 +71,7 @@ public class JwtTokenProvider {
         // 토큰 복호화
         Claims claims = parseClaims(accessToken);
 
-        // 사용자 정보 가져오기 (이메일,ROLE)
+        // 사용자 정보 가져오기 (id,ROLE)
         MemberDetails memberDetails = memberDetailService.loadUserByUsername(claims.getSubject());
         Collection<? extends GrantedAuthority> authorities =
                 Arrays.stream(claims.get("ROLE").toString().split(","))
@@ -88,14 +88,6 @@ public class JwtTokenProvider {
                 .setSigningKey(secretKey)
                 .parseClaimsJws(accessToken)
                 .getBody();
-    }
-
-    // JWT 토큰에서 이메일 추출
-    public String getEmail(String token){
-        return Jwts.parser()
-                .setSigningKey(secretKey)
-                .parseClaimsJws(token)
-                .getBody().getSubject();
     }
 
     // JWT 토큰 유효시간 추출

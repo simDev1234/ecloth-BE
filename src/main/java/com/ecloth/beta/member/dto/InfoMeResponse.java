@@ -15,5 +15,6 @@ public class InfoMeResponse {
     private String nickname;
     private String phone;
     private String profileImagePath;
+    private String role;
 
 }
