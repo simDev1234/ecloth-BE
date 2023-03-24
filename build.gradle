@@ -22,17 +22,12 @@ dependencies {
 
     // WEB
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.springframework.boot:spring-boot-starter-mail' // Java Mail Sender
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
-    implementation 'org.springframework.boot:spring-boot-starter-security' // security
-    implementation 'io.jsonwebtoken:jjwt:0.9.1' // JWT
-    implementation 'org.springframework.boot:spring-boot-starter-websocket'
 
     // RDB / NoSQL
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
-    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
-    implementation 'org.springframework.data:spring-data-envers'
     testImplementation 'junit:junit:4.13.1'
     runtimeOnly 'com.h2database:h2'
     runtimeOnly 'com.mysql:mysql-connector-j'
@@ -49,6 +44,23 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok'
     implementation 'com.github.ulisesbocchio:jasypt-spring-boot-starter:3.0.4'
 
+    // Spring Security
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+
+    // JWT
+    implementation 'io.jsonwebtoken:jjwt:0.9.1'
+
+    // BaseEntity
+    implementation 'org.springframework.data:spring-data-envers'
+
+    // Java Mail Sender
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
+
+    // Redis
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+    // JsonObject
+    implementation 'org.json:json:20220924'
 }
 
 tasks.named('test') {

@@ -11,16 +11,16 @@ public interface FollowRepository extends JpaRepository<Follow, Long> {
     @Query("select f from Follow f where f.requester.email=:requesterEmail and f.target.memberId=:targetId")
     Optional<Follow> findByRequesterEmailAndTargetId(String requesterEmail, Long targetId);
 
-    @Query("select f from Follow f join fetch f.target where f.requester.email = :email")
+    @Query("select f from Follow f join fetch f.target where f.requester.email = :email order by f.registerDate desc")
     List<Follow> findFollowListByRequesterEmail(String email);
 
-    @Query("select f from Follow f join fetch f.target where f.requester.memberId = :memberId")
+    @Query("select f from Follow f join fetch f.target where f.requester.memberId = :memberId order by f.registerDate desc")
     List<Follow> findFollowListByRequesterId(Long memberId);
 
-    @Query("select f from Follow f join fetch f.requester where f.target.email = :email")
+    @Query("select f from Follow f join fetch f.requester where f.target.email = :email order by f.registerDate desc")
     List<Follow> findFollowerListByTargetEmail(String email);
 
-    @Query("select f from Follow f join fetch f.requester where f.target.memberId = :memberId")
+    @Query("select f from Follow f join fetch f.requester where f.target.memberId = :memberId order by f.registerDate desc")
     List<Follow> findFollowerListByTargetId(Long memberId);
 
 }
