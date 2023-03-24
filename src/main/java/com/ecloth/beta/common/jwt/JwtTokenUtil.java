@@ -9,11 +9,16 @@ import java.time.Duration;
 @Service
 @RequiredArgsConstructor
 public class JwtTokenUtil {
-    private final RedisTemplate redisTemplate;
+    private final RedisTemplate<String, String> redisTemplate;;
 
-    // 로그아웃시 RefreshToken 삭제
+    // 로그아웃시 JWT RefreshToken 삭제
     public void deleteRefreshToken(String email) {
         redisTemplate.delete("RT:" + email);
+    }
+
+    // 로그아웃시 kakao RefreshToken 삭제
+    public void deleteKakaoRefreshToken(String email){
+        redisTemplate.delete("KRT:" + email);
     }
 
     // 삭제된 토큰 Blacklist 처리
