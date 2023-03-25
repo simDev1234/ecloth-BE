@@ -1,69 +1,74 @@
 package com.ecloth.beta.post.service;
 
+import com.ecloth.beta.member.entity.Member;
+import com.ecloth.beta.member.repository.MemberRepository;
 import com.ecloth.beta.post.dto.CommentRequest;
+import com.ecloth.beta.post.dto.CommentResponse;
 import com.ecloth.beta.post.entity.Comment;
-import com.ecloth.beta.post.entity.Reply;
+import com.ecloth.beta.post.entity.Posting;
 import com.ecloth.beta.post.repository.CommentRepository;
+import com.ecloth.beta.post.repository.PostingRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
+import javax.persistence.EntityNotFoundException;
 
 @Service
-@Transactional
+@RequiredArgsConstructor
 public class CommentService {
 
     private final CommentRepository commentRepository;
+    private final PostingRepository postingRepository;
+    private final MemberRepository memberRepository;
 
-    public CommentService(CommentRepository commentRepository) {
-        this.commentRepository = commentRepository;
-    }
-
-    public Optional<Comment> createComment(CommentRequest comment) {
-        comment.setDate(LocalDateTime.now());
-        return commentRepository.findById(comment);
-    }
-
-    public List<Comment> getAllComments() {
-        return commentRepository.findAll();
-    }
-
-    public Comment getCommentById(Long id) {
-        return commentRepository.findById(id).orElse(new Comment());
-    }
-
-    public Comment updateComment(Long id, CommentRequest newComment) {
-        Comment comment = commentRepository.findById(id).orElse(new Comment());
-        if (comment == null) {
-            return null;
-        }
-
-        comment = Comment.builder()
-                .content(newComment.getContent())
-                .nickname(newComment.getNickname())
-                .updatedAt(LocalDateTime.now())
-                .createdAt(LocalDateTime.now())
-                .reply(new Reply())
+    public CommentResponse createComment(CommentRequest commentRequest) {
+        Posting posting = postingRepository.findById(commentRequest.getPostingId())
+                .orElseThrow(() -> new EntityNotFoundException("Posting not found with id " + commentRequest.getPostingId()));
+        Member commenter = memberRepository.findById(commentRequest.getMemberId())
+                .orElseThrow(() -> new EntityNotFoundException("Member not found with id " + commentRequest.getMemberId()));
+        Comment comment = Comment.builder()
+                .content(commentRequest.getContent())
+                .postingId(posting)
+                .commenter(commenter)
                 .build();
-        return commentRepository.save(comment);
+        Comment savedComment = commentRepository.save(comment);
 
+        return toCommentResponse(savedComment);
     }
 
 
-
-    public boolean deleteComment(Long id) {
-        Comment comment = commentRepository.findById(id).orElse(new Comment());
-        if (comment == null) {
-            return false;
-        }
-        commentRepository.delete(comment);
-        return true;
+    public CommentResponse getComment(Long commentId) {
+        Comment comment = getCommentById(commentId);
+        return toCommentResponse(comment);
     }
 
-    public Comment getComment(Long id) {
-        return commentRepository.findById(id).orElse(new Comment());
+    public CommentResponse updateComment(Long commentId, CommentRequest commentRequest) {
+        Comment comment = getCommentById(commentId);
+        comment.update(commentRequest.getContent());
+        return toCommentResponse(comment);
     }
+
+
+    public void deleteComment(Long commentId) {
+        commentRepository.deleteById(commentId);
+    }
+
+    private Comment getCommentById(Long commentId) {
+        return commentRepository.findById(commentId)
+                .orElseThrow();
+    }
+
+    private CommentResponse toCommentResponse(Comment comment) {
+        return CommentResponse.builder()
+                .commentId(comment.getCommentId())
+                .postingId(comment.getPostingId().getPostingId())
+                .memberId(comment.getCommenter().getMemberId())
+                .nickname(comment.getCommenter().getNickname())
+                .profileImagePath(comment.getCommenter().getProfileImagePath())
+                .content(comment.getContent())
+                .createdDate(comment.getCreatedDate())
+                .updatedDate(comment.getUpdatedDate())
+                .build();
+    }
+
 }
-

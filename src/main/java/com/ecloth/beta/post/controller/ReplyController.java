@@ -2,52 +2,58 @@ package com.ecloth.beta.post.controller;
 
 import com.ecloth.beta.post.dto.ReplyRequest;
 import com.ecloth.beta.post.dto.ReplyResponse;
+import com.ecloth.beta.post.entity.Comment;
 import com.ecloth.beta.post.entity.Reply;
+import com.ecloth.beta.post.repository.ReplyRepository;
 import com.ecloth.beta.post.service.ReplyService;
+import io.swagger.annotations.Api;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.net.URI;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/replies")
+@Api(tags = "대댓글API")
+@RequestMapping("/comments/{commentId}/replies")
 public class ReplyController {
 
     private final ReplyService replyService;
+    private final ReplyRepository replyRepository;
 
-    public ReplyController(ReplyService replyService) {
+    public ReplyController(ReplyService replyService,
+                           ReplyRepository replyRepository) {
         this.replyService = replyService;
+        this.replyRepository = replyRepository;
     }
 
-    // 대댓글 조회 API
-    @GetMapping("/{replyId}")
-    public ResponseEntity<ReplyResponse> getReply() throws Exception {
-        ReplyResponse reply = replyService.getReplyById();
-        return ResponseEntity.ok(reply);
-    }
-
-    // 대댓글 작성 API
     @PostMapping
-    public ResponseEntity<ReplyResponse> createReply(@RequestBody ReplyRequest request) throws Exception {
-        Long replyId = replyService.createReply(request);
-        ReplyResponse response = new ReplyResponse();
-        return ResponseEntity.created(URI.create("/replies/" + replyId)).body(response);
+    public ResponseEntity<ReplyResponse> createReply(@PathVariable Long commentId, @RequestBody ReplyRequest replyRequest,
+                                                     @RequestHeader("X-MEMBER-ID") Long memberId) {
+        ReplyResponse replyResponse = replyService.createReply(commentId, memberId, replyRequest);
+        return ResponseEntity.status(HttpStatus.CREATED).body(replyResponse);
     }
 
-    // 대댓글 수정 API
-    @PutMapping("/{replyId}")
-    public ResponseEntity<ReplyResponse> updateReply(@PathVariable Long replyId, @RequestBody ReplyRequest request) throws Exception {
-        request.setId(replyId);
-        replyService.updateReply(request);
-        ReplyResponse response = new ReplyResponse();
-        return ResponseEntity.ok(response);
+    @GetMapping
+    public ResponseEntity<List<ReplyResponse>> getReplies(@PathVariable Long commentId) {
+        Comment parentComment = Comment.builder().commentId(commentId).build();
+        List<Reply> replies = replyRepository.findByParentComment(parentComment);
+        List<ReplyResponse> replyResponses = replies.stream().map(reply -> toReplyResponse(reply))
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(replyResponses);
     }
 
-    // 대댓글 삭제 API
-    @DeleteMapping("/{replyId}")
-    public ResponseEntity<ReplyResponse> deleteReply(@PathVariable Long replyId) throws Exception {
-        replyService.deleteReply(replyId);
-        ReplyResponse response = new ReplyResponse();
-        return ResponseEntity.ok(response);
+    private ReplyResponse toReplyResponse(Reply reply) {
+        return ReplyResponse.builder()
+                .replyId(reply.getReplyId())
+                .commentId(reply.getParentComment().getCommentId())
+                .memberId(reply.getReplier().getMemberId())
+                .nickname(reply.getReplier().getNickname())
+                .profileImagePath(reply.getReplier().getProfileImagePath())
+                .content(reply.getContent())
+                .createdDate(reply.getCreatedDate())
+                .updatedDate(reply.getUpdatedDate())
+                .build();
     }
 }

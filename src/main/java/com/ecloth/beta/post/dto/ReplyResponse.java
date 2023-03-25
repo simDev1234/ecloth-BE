@@ -1,29 +1,22 @@
 package com.ecloth.beta.post.dto;
 
-import com.ecloth.beta.post.entity.Reply;
+import java.time.LocalDateTime;
+
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
-
 @Getter
 @Setter
+@Builder
 public class ReplyResponse {
-
-        private Long id;
-        private String content;
+        private Long replyId;
+        private Long commentId;
+        private Long memberId;
         private String nickname;
-        private LocalDateTime date;
-        private LocalDateTime replyTime;
-
-
-//        public ReplyResponse(Reply reply) {
-//                this.id = reply.getCommentId(getId()));
-//                this.content = reply.getContent();
-//                this.nickname = reply.getNickname();
-//                this.date = reply.getDate();
-//                this.replyTime = reply.getReplyTime();
-//        }
-
-
+        private String profileImagePath;
+        private String content;
+        private LocalDateTime createdDate;
+        private LocalDateTime updatedDate;
 }
+

@@ -1,51 +1,54 @@
 package com.ecloth.beta.post.entity;
 
-import com.ecloth.beta.post.dto.PostRequest;
-import lombok.*;
-import org.springframework.data.annotation.CreatedDate;
-
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
-@Table(name = "POST")
+import com.ecloth.beta.member.entity.Member;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+
 @Entity
 @Getter
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Posting {
-    private static java.time.LocalDateTime LocalDateTime;
+
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    @Column(name = "id", nullable = false)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "post_id")
+    private Long postingId;
+
+    @ManyToOne
+    @JoinColumn(name = "member_id")
+    private Member postingMember;
+
+    private String nickname;
+    private String profileImagePath;
+
     private String title;
     private String content;
+    private String imagePath;
 
-//    private ArrayList<String> images;
-    private String nickname;
-    @CreatedDate
-    private LocalDateTime createdAt;
     private Long likeCount;
     private Long viewCount;
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Comment> comments;
+
+    private LocalDateTime createdDate;
+    private LocalDateTime updatedDate;
+
+    private int commentCount;
 
 
-    public static Posting from(PostRequest request) {
-        return Posting.builder()
-                .title(request.getTitle())
-                .content(request.getContent())
-                .nickname(request.getNickname())
-                .likeCount(0L)
-                .viewCount(0L)
-                .build();
+
+
+    public void update(String title, String content, String imagePath) {
+        this.title = title;
+        this.content = content;
+        this.imagePath = imagePath;
     }
+
+
 }
-
-
-
-

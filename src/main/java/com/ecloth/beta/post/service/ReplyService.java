@@ -1,5 +1,7 @@
 package com.ecloth.beta.post.service;
 
+import com.ecloth.beta.member.entity.Member;
+import com.ecloth.beta.member.repository.MemberRepository;
 import com.ecloth.beta.post.dto.ReplyRequest;
 import com.ecloth.beta.post.dto.ReplyResponse;
 import com.ecloth.beta.post.entity.Comment;
@@ -8,62 +10,48 @@ import com.ecloth.beta.post.repository.CommentRepository;
 import com.ecloth.beta.post.repository.ReplyRepository;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import javax.persistence.EntityNotFoundException;
+import javax.transaction.Transactional;
 @Service
+@Transactional
 public class ReplyService {
 
     private final ReplyRepository replyRepository;
     private final CommentRepository commentRepository;
+    private final MemberRepository memberRepository;
 
-    public ReplyService(ReplyRepository replyRepository, CommentRepository commentRepository) {
+    public ReplyService(ReplyRepository replyRepository, CommentRepository commentRepository,
+                        MemberRepository memberRepository) {
         this.replyRepository = replyRepository;
         this.commentRepository = commentRepository;
+        this.memberRepository = memberRepository;
     }
 
-    // 대댓글 조회 Service 메서드
-    public ReplyResponse getReplyById() throws Exception {
-        Reply reply = replyRepository.findById(getReplyById().getId())
-                .orElseThrow(() -> {
-                    try {
-                        return new Exception("Reply not found with id : " + getReplyById());
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                });
-        return new ReplyResponse();
-    }
-
-    // 대댓글 작성 Service 메서드
-    public Long createReply(ReplyRequest request) throws Exception {
-        Comment comment = commentRepository.findById(request.getCommentId())
-                .orElseThrow(() -> new Exception("Comment not found with id : " + request.getCommentId()));
+    public ReplyResponse createReply(Long commentId, Long memberId, ReplyRequest replyRequest) {
+        Comment parentComment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new EntityNotFoundException("Comment not found with id " + commentId));
+        Member replier = memberRepository.findById(memberId)
+                .orElseThrow(() -> new EntityNotFoundException("Member not found with id " + memberId));
         Reply reply = Reply.builder()
-                .content(request.getContent())
-                .nickname(request.getNickname())
-                .date(request.getDate())
-                .replyTime(LocalDateTime.now())
-                .comment(comment)
+                .parentComment(parentComment)
+                .replier(replier)
+                .content(replyRequest.getContent())
                 .build();
         Reply savedReply = replyRepository.save(reply);
-        return savedReply.getReplyId();
+        return toReplyResponse(savedReply);
     }
 
-    // 대댓글 수정 Service 메서드
-    public void updateReply(ReplyRequest request) throws Exception {
-        Reply reply = replyRepository.findById(request.getId())
-                .orElseThrow(() -> new Exception("Reply not found with id : " + request.getId()));
-        reply.setContent(request.getContent());
-        reply.setReplyTime(request.getReplyTime());
-        replyRepository.save(reply);
+    private ReplyResponse toReplyResponse(Reply reply) {
+        return ReplyResponse.builder()
+                .replyId(reply.getReplyId())
+                .commentId(reply.getParentComment().getCommentId())
+                .memberId(reply.getReplier().getMemberId())
+                .nickname(reply.getReplier().getNickname())
+                .profileImagePath(reply.getReplier().getProfileImagePath())
+                .content(reply.getContent())
+                .createdDate(reply.getCreatedDate())
+                .updatedDate(reply.getUpdatedDate())
+                .build();
     }
 
-    // 대댓글 삭제 Service 메서드
-    public void deleteReply(Long replyId) throws Exception {
-        Reply reply = replyRepository.findById(replyId)
-                .orElseThrow(() -> new Exception("Reply not found with id : " + replyId));
-        replyRepository.delete(reply);
-    }
 }
-
-
-

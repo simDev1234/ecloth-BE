@@ -1,48 +1,72 @@
 package com.ecloth.beta.post.service;
 
-import com.ecloth.beta.post.dto.PostRequest;
+import com.ecloth.beta.post.dto.PostingRequest;
+import com.ecloth.beta.post.dto.PostingResponse;
 import com.ecloth.beta.post.entity.Posting;
 import com.ecloth.beta.post.repository.PostingRepository;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
-@Getter
 @Service
 @RequiredArgsConstructor
 public class PostingService {
 
     private final PostingRepository postingRepository;
 
-    public List<Posting> getAllPosts() {
-        return postingRepository.findAll();
+
+    public PostingResponse createPost(PostingRequest postingRequest) {
+        Posting posting = Posting.builder()
+                .postingId(postingRequest.getMemberId())
+                .title(postingRequest.getTitle())
+                .content(postingRequest.getContent())
+                .imagePath(postingRequest.getImagePath())
+                .build();
+
+        Posting savedPosting = postingRepository.save(posting);
+
+        return toPostResponse(savedPosting);
     }
 
-    public Posting getPostById(Long id) {
-        return postingRepository.findById(id).orElse(new Posting());
+    public PostingResponse getPost(Long postId) {
+        Posting posting = getPostById(postId);
+        return toPostResponse(posting);
     }
 
-    public Posting createPost(PostRequest postRequest) {
-        Posting posting = Posting.from(postRequest);
-        Posting saved = postingRepository.save(posting);
-        return (Posting) postingRepository;
+    public PostingResponse updatePost(Long postId, PostingRequest postingRequest) {
+        Posting posting = getPostById(postId);
+
+        posting.update(postingRequest.getTitle(), postingRequest.getContent(), postingRequest.getImagePath());
+
+        return toPostResponse(posting);
     }
 
-    public Posting updatePost(Long id , Posting posting) {
-        return (Posting) postingRepository.findAll((Pageable) posting);
+
+    public void deletePost(Long postId) {
+        postingRepository.deleteById(postId);
     }
 
+    private Posting getPostById(Long postId) {
+//        return postingRepository.findById(postId).orElseThrow(() -> notfound());
+        return postingRepository.findById(postId)
+                .orElseThrow();
+    }
 
-    public boolean deletePost(Long id) {
-        Posting posting = postingRepository.findById(id).orElse(new Posting());
-        if (posting == null) {
-            return false;
-        }
-        postingRepository.delete(posting);
-        return true;
+    private PostingResponse toPostResponse(Posting posting) {
+        return PostingResponse.builder()
+                .postId(posting.getPostingId())
+                .memberId(posting.getPostingId())
+                .nickname(posting.getNickname())
+                .profileImagePath(posting.getProfileImagePath())
+                .title(posting.getTitle())
+                .content(posting.getContent())
+                .imagePath(posting.getImagePath())
+                .likeCount(posting.getLikeCount())
+                .viewCount(posting.getViewCount())
+                .createdDate(posting.getCreatedDate())
+                .updatedDate(posting.getUpdatedDate())
+                .commentCount(posting.getCommentCount())
+                .build();
     }
 
 }
+

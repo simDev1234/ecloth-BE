@@ -1,37 +1,56 @@
 package com.ecloth.beta.post.entity;
 
-import lombok.*;
-
-import javax.persistence.*;
 import java.time.LocalDateTime;
 
+import javax.persistence.*;
+
+import com.ecloth.beta.member.entity.Member;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@Entity
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Entity
-@Getter
-@Setter
 public class Reply {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "reply_id")
     private Long replyId;
+
+    @ManyToOne
+    @JoinColumn(name = "comment_id")
+    private Comment comment;
+
+    @ManyToOne
+    @JoinColumn(name = "member_id")
+    private Member replier;
+
+    @ManyToOne
+    @JoinColumn(name = "parent_comment_id")
+    private Comment parentComment;
 
     private String content;
 
-    private String nickname;
+    private LocalDateTime createdDate;
+    private LocalDateTime updatedDate;
 
-    private LocalDateTime date;
+    public void update(String content) {
+        this.content = content;
+    }
 
-    private LocalDateTime replyTime; // 대댓글 작성 시간
+    public boolean isOwnedBy(Member member) {
+        return replier.equals(member);
+    }
 
-    @OneToOne(mappedBy = "reply",fetch = FetchType.LAZY)
-
-    private Comment comment;
-
-
-//    public void setCommentId(Long commentId) {
-//        this.commentId = commentId;
-//    }
-
+    public Comment getParentComment() {
+        return parentComment;
+    }
 }
+
 

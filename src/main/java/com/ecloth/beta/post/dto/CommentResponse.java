@@ -1,26 +1,22 @@
 package com.ecloth.beta.post.dto;
 
 import lombok.Getter;
-import lombok.Setter;
-
 import java.time.LocalDateTime;
+import lombok.Builder;
+import lombok.Setter;
 
 @Getter
 @Setter
+@Builder
 public class CommentResponse {
-
-    private Long id;
-
-    private String content;
-
+    private Long commentId;
+    private Long postingId;
+    private Long parentId;
+    private Long memberId;
     private String nickname;
-
-    private LocalDateTime date;
-
-    private int replyCount;
-
-    private LocalDateTime commentTime;
-
-
-
+    private String profileImagePath;
+    private String content;
+    private LocalDateTime createdDate;
+    private LocalDateTime updatedDate;
 }
+
