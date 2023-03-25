@@ -3,6 +3,8 @@ package com.ecloth.beta.member.entity;
 import com.ecloth.beta.common.entity.BaseEntity;
 import com.ecloth.beta.follow.entity.Follow;
 import com.ecloth.beta.member.dto.InfoMeUpdateRequest;
+import com.ecloth.beta.member.exception.ErrorCode;
+import com.ecloth.beta.member.exception.MemberException;
 import com.ecloth.beta.member.model.MemberRole;
 import com.ecloth.beta.member.model.MemberStatus;
 import lombok.AllArgsConstructor;
@@ -78,8 +80,11 @@ public class Member extends BaseEntity implements Serializable {
         if (request.getProfileImagePath() != null) {
             this.profileImagePath = request.getProfileImagePath();
         }
-        if (request.getPassword() != null) {
-            this.password = passwordEncoder.encode(request.getPassword());
+        if (request.getNewPassword() != null && request.getPassword() != null) {
+            if (!passwordEncoder.matches(request.getPassword(), this.password)) {
+                throw new MemberException(ErrorCode.WRONG_PASSWORD);
+            }
+            this.password = passwordEncoder.encode(request.getNewPassword());
         }
     }
 }

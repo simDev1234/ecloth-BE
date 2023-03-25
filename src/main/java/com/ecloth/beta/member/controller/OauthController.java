@@ -16,7 +16,7 @@ import springfox.documentation.annotations.ApiIgnore;
 @Slf4j
 @RestController
 @AllArgsConstructor
-@Api(tags = "카카오 로그인 API")
+@Api(tags = "카카오 인증 API")
 public class OauthController {
 
     private final OauthService oAuthService;
