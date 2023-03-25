@@ -50,8 +50,8 @@ public class Member extends BaseEntity {
     private LocalDateTime passwordResetRequestDate;
 
     // location
-    private String latitude;
-    private String longitude;
+    private int x;
+    private int y;
 
     // follow & follower list
     @OneToMany(mappedBy = "requester")
