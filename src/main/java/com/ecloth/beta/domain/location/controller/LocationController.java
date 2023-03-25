@@ -1,6 +1,5 @@
 package com.ecloth.beta.domain.location.controller;
 
-import com.ecloth.beta.domain.location.dto.LocationDto;
 import com.ecloth.beta.domain.location.entity.Locational;
 import com.ecloth.beta.domain.location.service.LocationService;
 import io.swagger.annotations.Api;
