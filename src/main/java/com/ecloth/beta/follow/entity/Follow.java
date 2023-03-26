@@ -22,26 +22,12 @@ public class Follow extends BaseEntity {
     @Column(name = "follow_id", nullable = false)
     private Long followId;
 
-    @ManyToOne
-    @JoinColumn(name = "requester_id")
-    private Member requester;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "requester_email", referencedColumnName = "email")
+    private Member requester; // 팔로우를 요청한 회원
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "target_id")
-    private Member target;
-
-    public void changeRequester(Member requester){
-        this.requester = requester;
-        if (!requester.getFollowList().contains(this)) {
-            requester.getFollowList().add(this);
-        }
-    }
-
-    public void changeTarget(Member target){
-        this.target = target;
-        if (!target.getFollowerList().contains(this)){
-            target.getFollowerList().add(this);
-        }
-    }
+    private Member target; // 팔로우 하려는 대상 회원
 
 }

@@ -1,36 +1,39 @@
 package com.ecloth.beta.follow.dto;
 
 import com.ecloth.beta.common.page.CustomPage;
+import com.ecloth.beta.follow.entity.Follow;
 import com.ecloth.beta.follow.type.PointDirection;
 import com.ecloth.beta.member.entity.Member;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
 
 @AllArgsConstructor
 @Builder
 @Getter
-@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class FollowListResponse implements Serializable{
 
     private static final long serialVersionUID = 1L;
-    private Long memberId;
     private String pointDirection;
     private long total;
     @Builder.Default
-    private CustomPage page = new CustomPage(1, 5, "createdDate", "dsc");
-    private List<MemberShortInfo> followList;
+    private CustomPage page = new CustomPage(1, 5, "registerDate", "DESC");
+    private List<MemberShortInfo> followList = new ArrayList<>();
 
     @AllArgsConstructor
     @Getter
     @Builder
-    @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
-    public static class MemberShortInfo {
+    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+    public static class MemberShortInfo implements Serializable{
 
         private Long targetId;
         private String nickname;
@@ -46,27 +49,25 @@ public class FollowListResponse implements Serializable{
 
     }
 
-    public static FollowListResponse fromEntity(Long memberId, PointDirection dir,
-                                                long total, CustomPage resultPage,
-                                                List<MemberShortInfo> followList) {
+    public static FollowListResponse fromEmpty(PointDirection dir, CustomPage requestPage) {
         return FollowListResponse.builder()
-                .memberId(memberId)
-                .total(total)
-                .page(resultPage)
+                .total(0)
+                .page(CustomPage.of(requestPage, 0))
                 .pointDirection(dir.name().toUpperCase(Locale.ROOT))
-                .followList(followList)
                 .build();
     }
 
     public static FollowListResponse fromEntity(PointDirection dir, CustomPage requestPage,
-                                                 Member member, List<MemberShortInfo> followList) {
+                                                List<MemberShortInfo> followList) {
+
         CustomPage resultPage = CustomPage.of(requestPage, followList.size());
 
-        return FollowListResponse.fromEntity(
-                member.getMemberId(),
-                dir, followList.size(), resultPage,
-                followList
-        );
+        return FollowListResponse.builder()
+                .total(followList.size())
+                .page(resultPage)
+                .pointDirection(dir.name().toUpperCase(Locale.ROOT))
+                .followList(followList)
+                .build();
     }
 
 }
