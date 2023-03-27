@@ -59,8 +59,8 @@ public class Member extends BaseEntity implements Serializable {
     private LocalDateTime passwordResetRequestDate;
 
     // location
-    private String latitude;
-    private String longitude;
+    private int x;
+    private int y;
 
     // follow & follower
     @OneToMany(mappedBy = "requester")

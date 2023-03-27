@@ -1,28 +1,29 @@
 package com.ecloth.beta.domain.location.service;
 
-import com.ecloth.beta.domain.location.entity.Locational;
-import com.ecloth.beta.domain.location.repository.LocationRepository;
+
+import com.ecloth.beta.domain.location.dto.Locational;
+import com.ecloth.beta.member.entity.Member;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
+import com.ecloth.beta.member.repository.MemberRepository;
 
 @Service
 public class LocationService {
 
-    private final LocationRepository locationRepository;
+    private final MemberRepository memberRepository;
 
     @Autowired
-    public LocationService(LocationRepository locationRepository) {
-        this.locationRepository = locationRepository;
+    public LocationService(MemberRepository memberRepository) {
+        this.memberRepository = memberRepository;
     }
 
-    public Locational saveLocation(int x, int y) {
-        Locational locational = new Locational(x, y);
-        return locationRepository.save(locational);
-    }
-
-    public Locational getLocationById(Long id) {
-        return locationRepository.findById(id).orElseThrow(() -> new RuntimeException("error"));
+    public void updateLocation(Long memberId, Locational locational) {
+        Member member = Member.builder()
+                .x(locational.getX())
+                .y(locational.getY())
+                .build();
+        memberRepository.save(member);
     }
 }
+
 
