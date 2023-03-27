@@ -3,7 +3,9 @@ package com.ecloth.beta.member.service;
 import com.ecloth.beta.common.jwt.JwtTokenProvider;
 import com.ecloth.beta.common.jwt.JwtTokenUtil;
 import com.ecloth.beta.member.component.JavaMailSenderComponent;
+import com.ecloth.beta.member.dto.MemberPasswordUpdateRequest;
 import com.ecloth.beta.member.dto.MemberRequest;
+import com.ecloth.beta.member.dto.MemberLoginResponse;
 import com.ecloth.beta.member.dto.Token;
 import com.ecloth.beta.member.entity.Member;
 import com.ecloth.beta.member.exception.ErrorCode;
@@ -14,11 +16,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.SecureRandom;
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -77,23 +82,24 @@ public class AuthService {
         Member member = memberRepository.findByEmailAuthCode(emailAuthCode)
                 .orElseThrow(() -> new MemberException(ErrorCode.INVALID_EMAIL_AUTH_CODE));
 
-        // 이메일 인증 완료 후, 멤버 정보 업데이트
-        member = member.toBuilder()
-                .memberStatus(MemberStatus.ACTIVE)
-                .emailAuthDate(LocalDateTime.now())
-                .build();
+       LocalDateTime emailAuthDate = LocalDateTime.now();
+       member.updateMemberStatusToActive(emailAuthDate);
 
         memberRepository.save(member);
-
     }
 
-    public HttpHeaders login(MemberRequest.Login loginDto) {
+    public MemberLoginResponse login(MemberRequest.Login loginDto) {
         // 이메일 검증
         Member member = memberRepository.findByEmail(loginDto.getEmail())
                 .orElseThrow(() -> new MemberException(ErrorCode.NOT_FOUND_USER));
         // 비밀번호 검증
         if (!passwordEncoder.matches(loginDto.getPassword(), member.getPassword())) {
             throw new MemberException(ErrorCode.WRONG_PASSWORD);
+        }
+        // 회원 상태 검증
+        String status = String.valueOf(member.getMemberStatus());
+        if (Objects.equals(status, "INACTIVE") || Objects.equals(status, "SUSPENDED")) {
+            throw new MemberException(ErrorCode.INACTIVE_OR_SUSPENDED_MEMBER);
         }
         // AccessToken, Refresh Token 생성
         Token token = jwtTokenProvider.generateToken(member.getMemberId());
@@ -105,7 +111,9 @@ public class AuthService {
         HttpHeaders headers = new HttpHeaders();
         headers.add("authorization", "Bearer " + token.getAccessToken());
         headers.add("refreshtoken", "Bearer " + token.getRefreshToken());
-        return headers;
+        String message = "로그인이 완료 되었습니다.";
+
+        return new MemberLoginResponse(headers, message);
     }
 
     @Transactional
@@ -193,6 +201,40 @@ public class AuthService {
 
             }
         }
+    }
+
+    public void resetPassword(String email) {
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new MemberException(ErrorCode.NOT_FOUND_USER));
+        String status = String.valueOf(member.getMemberStatus());
+        if (Objects.equals(status, "UNVERIFIED")) {
+            throw new MemberException(ErrorCode.UNVERIFIED_MEMBER);
+        }
+
+        SecureRandom random = new SecureRandom();
+        String code = String.format("%06d", random.nextInt(999999));
+        LocalDateTime requestDate = LocalDateTime.now();
+
+        String subject = "이옷어때? 에서 비밀번호 변경 코드를 발송했습니다.";
+        String content = "비밀번호 변경 코드를 아래 링크에 입력 후,새로운 비밀번호로 변경해주세요. \n"
+                + code + "\n"
+                + "http://localhost:8080/api/member/resetPassword/update";
+
+        javaMailSenderComponent.sendMail(email, subject, content);
+
+        member.setPasswordResetCodeAndRequestDate(code, requestDate);
+        memberRepository.save(member);
+
+        ResponseEntity.ok().build();
+    }
+
+    public void resetPasswordUpdate(MemberPasswordUpdateRequest request) {
+        Member member = memberRepository.findByPasswordResetCode(request.getCode())
+                .orElseThrow(() -> new MemberException(ErrorCode.NOT_FOUND_USER));
+        if (Objects.equals(request.getCode(), member.getPasswordResetCode())) {
+            member.updateNewPassword(request, passwordEncoder);
+        }
+        ResponseEntity.ok().build();
     }
 
 }
