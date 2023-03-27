@@ -3,6 +3,8 @@ package com.ecloth.beta.common.jwt;
 import com.ecloth.beta.member.dto.Token;
 import com.ecloth.beta.common.security.MemberDetailService;
 import com.ecloth.beta.common.security.MemberDetails;
+import com.ecloth.beta.member.exception.ErrorCode;
+import com.ecloth.beta.member.exception.MemberException;
 import io.jsonwebtoken.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -107,16 +109,14 @@ public class JwtTokenProvider {
             Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
             log.info("validate 접근");
             return true;
-        } catch (MalformedJwtException e) {
-            log.warn("잘못된 JWT 서명입니다.");
         } catch (ExpiredJwtException e) {
             log.warn("만료된 JWT 토큰입니다.");
-        } catch (UnsupportedJwtException e) {
-            log.warn("지원되지 않는 JWT 토큰입니다.");
-        } catch (IllegalArgumentException e) {
-            log.warn("JWT 토큰이 잘못되었습니다.");
+            throw new MemberException(ErrorCode.EXPIRED_TOKEN);
+        } catch (Exception e) {
+            log.warn("유효하지 않은 토큰입니다.");
+            throw new MemberException(ErrorCode.INVALID_TOKEN);
         }
-        return false;
+
     }
 
 }
