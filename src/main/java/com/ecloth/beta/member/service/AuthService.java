@@ -16,11 +16,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.servlet.http.HttpServletResponse;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -82,8 +84,8 @@ public class AuthService {
         Member member = memberRepository.findByEmailAuthCode(emailAuthCode)
                 .orElseThrow(() -> new MemberException(ErrorCode.INVALID_EMAIL_AUTH_CODE));
 
-       LocalDateTime emailAuthDate = LocalDateTime.now();
-       member.updateMemberStatusToActive(emailAuthDate);
+        LocalDateTime emailAuthDate = LocalDateTime.now();
+        member.updateMemberStatusToActive(emailAuthDate);
 
         memberRepository.save(member);
     }
@@ -110,7 +112,15 @@ public class AuthService {
         // AccessToken과 RefreshToken Http Header에 담아 반환
         HttpHeaders headers = new HttpHeaders();
         headers.add("authorization", "Bearer " + token.getAccessToken());
-        headers.add("refreshtoken", "Bearer " + token.getRefreshToken());
+
+        ResponseCookie refreshTokenCookie = ResponseCookie.from("refreshtoken", token.getRefreshToken())
+                .path("/api/token/reissue")
+                .httpOnly(true)
+//                .secure(true) //HTTPS
+                .sameSite("Strict")
+                .build();
+        headers.add("Set-Cookie", refreshTokenCookie.toString());
+
         String message = "로그인이 완료 되었습니다.";
 
         return new MemberLoginResponse(headers, message);
@@ -134,7 +144,14 @@ public class AuthService {
                             , token.getRefreshTokenExpirationTime(), TimeUnit.MILLISECONDS);
 
             headers.add("authorization", "Bearer " + token.getAccessToken());
-            headers.add("refreshtoken", "Bearer " + token.getRefreshToken());
+            ResponseCookie refreshTokenCookie = ResponseCookie.from("refreshtoken", token.getRefreshToken())
+                    .path("/api/token/reissue")
+                    .httpOnly(true)
+//                .secure(true) //HTTPS
+                    .sameSite("Strict")
+                    .build();
+            headers.add("Set-Cookie", refreshTokenCookie.toString());
+
             log.info("토큰갱신 AT : " + token.getAccessToken());
             log.info("토큰갱신 RT : " + token.getRefreshToken());
             return headers;
@@ -162,7 +179,13 @@ public class AuthService {
                             , token.getRefreshTokenExpirationTime(), TimeUnit.MILLISECONDS);
 
             headers.add("authorization", "Bearer " + token.getAccessToken());
-            headers.add("refreshtoken", "Bearer " + token.getRefreshToken());
+            ResponseCookie refreshTokenCookie = ResponseCookie.from("refreshtoken", token.getRefreshToken())
+                    .path("/api/token/reissue")
+                    .httpOnly(true)
+//                .secure(true) //HTTPS
+                    .sameSite("Strict")
+                    .build();
+            headers.add("Set-Cookie", refreshTokenCookie.toString());
 
             return headers;
 

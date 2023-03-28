@@ -13,6 +13,9 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
+
 @Slf4j
 @RestController
 @RequestMapping("/api")
@@ -64,11 +67,18 @@ public class MemberController {
 
     @ApiOperation(value = "회원 탈퇴", notes = "로그인 중인 회원의 회원 상태를 INACTIVE로 변경한다.")
     @PutMapping("/member/me/status")
-    public ResponseEntity<Void> updateMemberStatus(@ApiIgnore @AuthenticationPrincipal MemberDetails memberDetails) {
+    public ResponseEntity<Void> updateMemberStatus(@ApiIgnore @AuthenticationPrincipal MemberDetails memberDetails,
+                                                   HttpServletResponse response) {
 
         Long memberId = getMemberId(memberDetails);
         String role = getRole(memberDetails);
         memberService.updateMemberStatus(memberId,role);
+
+        // 클라이언트의 refreshtoken 쿠키 삭제
+        Cookie refreshTokenCookie = new Cookie("refreshtoken", null);
+        refreshTokenCookie.setMaxAge(0);
+        refreshTokenCookie.setPath("/api/token/reissue");
+        response.addCookie(refreshTokenCookie);
 
         return ResponseEntity.ok().build();
     }

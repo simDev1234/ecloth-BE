@@ -13,6 +13,7 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.Arrays;
@@ -45,6 +46,7 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
         // 헤더에서 JWT 를 받아온다
         String token = resolveToken((HttpServletRequest) request);
         log.info("JwtAuthenticationFilter : doFilter 들어옴");
+        log.info("입력 토큰 : " + token);
 
         // 토큰 유효성 검사
         if (token != null && jwtTokenProvider.validateToken(token)) {
@@ -65,11 +67,24 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
         chain.doFilter(request, response);
 
     }
+
     // Request Header 에서 토큰 정보 추출
     private String resolveToken(HttpServletRequest request) {
         String bearerToken = request.getHeader(JwtProperties.AUTHORIZATION_HEADER);
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(JwtProperties.BEARER_TYPE)) {
+            log.info("Bearer 토큰 추출 : " + bearerToken.substring(7));
             return bearerToken.substring(7);
+        }
+
+        //요청 헤더에서 JWT 토큰을 찾을 수 없을 때, 쿠키에서 refreshtoken 값을 추출하여 반환.
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (cookie.getName().equals("refreshtoken")) {
+                    log.info("쿠키에서 리프레시토큰 추출 : " + cookie.getValue());
+                    return cookie.getValue();
+                }
+            }
         }
         return null;
     }

@@ -17,6 +17,9 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
+
 @Slf4j
 @RestController
 @RequestMapping("/api")
@@ -68,11 +71,18 @@ public class AuthController {
     @ApiOperation(value = "로그아웃", notes = "사용자의 토큰을 삭제시키고 로그아웃 한다.")
     @PostMapping("/logout")
     public ResponseEntity<String> memberLogout(@ApiIgnore @AuthenticationPrincipal MemberDetails memberDetails,
-                                               @ApiIgnore @RequestHeader("Authorization") String accessToken) {
+                                               @ApiIgnore @RequestHeader("Authorization") String accessToken,
+                                               HttpServletResponse response) {
 
         String memberId = getMemberId(memberDetails);
         String role = getRole(memberDetails);
         authService.logout(memberId, role, accessToken);
+
+        // 클라이언트의 refreshtoken 쿠키 삭제
+        Cookie refreshTokenCookie = new Cookie("refreshtoken", null);
+        refreshTokenCookie.setMaxAge(0);
+        refreshTokenCookie.setPath("/api/token/reissue");
+        response.addCookie(refreshTokenCookie);
 
         return ResponseEntity.ok()
                 .body("로그아웃 되었습니다.");
