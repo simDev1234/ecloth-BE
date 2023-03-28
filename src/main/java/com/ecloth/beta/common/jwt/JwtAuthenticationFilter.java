@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.util.Arrays;
 
 import static com.ecloth.beta.common.security.SecurityConfig.PERMIT_API_URL_ARRAY;
+import static com.ecloth.beta.common.security.SecurityConfig.PERMIT_URL_ARRAY;
 
 //클라이언트에서 전달된 JWT 토큰을 검증하고, 검증된 정보를 기반으로 인증 객체(Authentication)를 생성하여 Spring Security 컨텍스트에 저장
 @Slf4j
@@ -36,7 +37,7 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
         String requestURI = ((HttpServletRequest) request).getRequestURI();
 
         // 요청 url이 허용된 url 리스트에 포함되어 있는지 확인
-        if (Arrays.asList(PERMIT_API_URL_ARRAY).contains(requestURI)) {
+        if (Arrays.asList(PERMIT_API_URL_ARRAY).contains(requestURI) || Arrays.asList(PERMIT_URL_ARRAY).contains(requestURI)) {
             chain.doFilter(request, response);
             return;
         }
