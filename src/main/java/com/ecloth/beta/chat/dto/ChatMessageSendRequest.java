@@ -5,9 +5,10 @@ import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
-public class ChatMessageRequest {
+public class ChatMessageSendRequest {
 
-    private Long receiverId;
-    private String content;
+    private Long chatRoomId;
+    private Long writerId;
+    private String message;
 
 }

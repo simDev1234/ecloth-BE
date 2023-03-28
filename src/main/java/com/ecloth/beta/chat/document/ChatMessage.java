@@ -18,9 +18,9 @@ public class ChatMessage {
 
     @Id
     private ObjectId id;
-    private Long senderId;
-    private Long receiverId;
-    private String content;
+    private Long chatRoomId;
+    private Long writerId;
+    private String message;
     private LocalDateTime registerDate;
 
 }

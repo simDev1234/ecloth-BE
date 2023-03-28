@@ -32,11 +32,15 @@ dependencies {
 
     // RDB / NoSQL
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     testImplementation 'junit:junit:4.13.1'
     runtimeOnly 'com.h2database:h2'
     runtimeOnly 'com.mysql:mysql-connector-j'
+
+    // QueryDSL
+    implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
+    annotationProcessor "jakarta.persistence:jakarta.persistence-api"
+    annotationProcessor "jakarta.annotation:jakarta.annotation-api"
 
     // Swagger
     implementation group: 'io.springfox', name: 'springfox-boot-starter', version: '3.0.0'

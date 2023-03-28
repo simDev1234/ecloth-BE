@@ -1,15 +1,21 @@
 package com.ecloth.beta.follow.controller;
 
+import com.ecloth.beta.common.security.MemberAuthentication;
 import com.ecloth.beta.follow.dto.FollowListRequest;
 import com.ecloth.beta.follow.dto.FollowListResponse;
 import com.ecloth.beta.follow.dto.FollowingResponse;
 import com.ecloth.beta.follow.service.FollowService;
 import com.ecloth.beta.follow.type.PointDirection;
+import com.ecloth.beta.member.entity.Member;
 import io.swagger.annotations.Api;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
+
+import javax.naming.AuthenticationNotSupportedException;
 import java.security.Principal;
 import java.util.Locale;
 import static com.ecloth.beta.follow.type.PointDirection.FOLLOWS;
