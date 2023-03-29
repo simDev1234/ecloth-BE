@@ -25,23 +25,29 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private final JwtTokenProvider jwtTokenProvider;
     private final JwtTokenUtil jwtTokenUtil;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
-    private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    private static final String[] PERMIT_URL_ARRAY = {
-            "/", "/api/register/**", "/api/email-auth/**", "/api", "/js/**", "/css/**", "/image/**", "/dummy/**",
+    public static final String[] PERMIT_URL_ARRAY = {
+            "/error","/js/**", "/css/**", "/image/**", "/dummy/**",
             "/favicon.ico", "/**/favicon.ico",
             //h2
             "/h2-console/**",
             //swagger
             "/swagger-ui.html", "/swagger-ui/index.html", "/swagger/**",
             "/swagger-resources/**", "/v2/api-docs", "/v3/api-docs", "/webjars/**",
+
+    };
+
+    public static final String[] PERMIT_API_URL_ARRAY ={
             // api
-            "/api/register", "/api/login", "/api/register/email-auth","/api/token/reissue"
+            "/","/api/register","/api/register/email-auth/**","/api/login", "/api/register/email-auth",
+            "/KakaoLogin/**","/api/member/{param}/follows","/api/feed/post","/api/feed/post/{post_id}","/api/member/resetPassword",
+            "/api/member/resetPassword/update",
+
     };
 
     @Override
@@ -56,8 +62,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider, jwtTokenUtil),
                         UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling()
-                .authenticationEntryPoint(jwtAuthenticationEntryPoint) //인증 실패
-                .accessDeniedHandler(jwtAccessDeniedHandler) //인가 실패
+                .authenticationEntryPoint(jwtAuthenticationEntryPoint)
 
                 .and()
                 .sessionManagement()
@@ -66,8 +71,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .authorizeRequests()
                 .antMatchers(PERMIT_URL_ARRAY).permitAll()
-                .anyRequest()
-                .authenticated(); //회원가입,이메일인증,로그인,토큰재발급을 제외한 모든 API 인증필요
+                .antMatchers(PERMIT_API_URL_ARRAY).permitAll()
+
+                .and()
+                .authorizeRequests()
+                .anyRequest().authenticated();
 
     }
 

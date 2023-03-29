@@ -2,7 +2,8 @@ package com.ecloth.beta.member.entity;
 
 import com.ecloth.beta.common.entity.BaseEntity;
 import com.ecloth.beta.follow.entity.Follow;
-import com.ecloth.beta.member.dto.InfoMeUpdateRequest;
+import com.ecloth.beta.member.dto.MemberPasswordUpdateRequest;
+import com.ecloth.beta.member.dto.MemberUpdateInfoRequest;
 import com.ecloth.beta.member.exception.ErrorCode;
 import com.ecloth.beta.member.exception.MemberException;
 import com.ecloth.beta.member.model.MemberRole;
@@ -13,6 +14,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.envers.AuditOverride;
 import org.springframework.security.crypto.password.PasswordEncoder;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -20,7 +22,7 @@ import java.util.List;
 
 @Entity
 @Getter
-@Builder(toBuilder = true)
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @AuditOverride(forClass = BaseEntity.class)
@@ -70,7 +72,7 @@ public class Member extends BaseEntity implements Serializable {
     private MemberRole memberRole;
 
 
-    public void update(InfoMeUpdateRequest request, PasswordEncoder passwordEncoder) {
+    public void update(MemberUpdateInfoRequest request, PasswordEncoder passwordEncoder) {
         if (request.getNickname() != null) {
             this.nickname = request.getNickname();
         }
@@ -86,5 +88,24 @@ public class Member extends BaseEntity implements Serializable {
             }
             this.password = passwordEncoder.encode(request.getNewPassword());
         }
+    }
+
+    public void updateMemberStatusToActive(LocalDateTime emailAuthDate){
+        this.memberStatus = MemberStatus.ACTIVE;
+        this.emailAuthDate = emailAuthDate;
+    }
+
+    public void updateMemberStatusToInactive() {
+        this.memberStatus = MemberStatus.INACTIVE;
+    }
+
+    public void setPasswordResetCodeAndRequestDate(String code, LocalDateTime requestDate) {
+        this.passwordResetCode = code;
+        this.passwordResetRequestDate = requestDate;
+    }
+
+    public void updateNewPassword(MemberPasswordUpdateRequest request, PasswordEncoder passwordEncoder) {
+        this.passwordResetCode = null;
+        this.password = passwordEncoder.encode(request.getNewPassword());
     }
 }
