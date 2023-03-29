@@ -34,7 +34,7 @@ public class ChatRoomService {
     private final ChatRoomRepository chatRoomRepository;
     private final ChatMessageService chatMessageService;
 
-    // 채팅(룸) 생성
+    // 채팅룸 생성
     public ChatRoomCreateResponse createChat(ChatRoomCreateRequest request) {
 
         Set<Member> chatRoomMembers = new HashSet<>();
@@ -47,7 +47,16 @@ public class ChatRoomService {
         return ChatRoomCreateResponse.fromEntity(newChatRoom);
     }
 
-    // 회원이 속한 채팅룸 목록 조회
+    // 채팅룸에 소속된 사람인지 확인
+    public boolean isMemberOfChatRoom(Long chatRoomId, Long memberId) {
+
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new UsernameNotFoundException("Member Not Found"));
+
+        return chatRoomRepository.existsByChatRoomIdAndMembersContaining(chatRoomId, member);
+    }
+
+    // 채팅룸 목록 조회 (회원이 소속한 채팅룸)
     public ChatRoomListResponse findChatList(Long memberId, CustomPage requestPage) {
 
         Member member = memberRepository.findById(memberId)
@@ -60,8 +69,7 @@ public class ChatRoomService {
         for (ChatRoom room : chatRooms.getContent()) {
             Member partnerMember = room.getMembers().stream().filter(x -> x != member).findFirst()
                             .orElseThrow(() -> new UsernameNotFoundException("Member Not Found"));
-            Optional<ChatMessage> latestPartnerMessage =
-                    chatMessageService.findLatestPartnerMessage(room.getChatRoomId(), partnerMember.getMemberId());
+            Optional<ChatMessage> latestPartnerMessage = chatMessageService.findLatestMessage(room.getChatRoomId());
             chatRoomInfoList.add(ChatRoomInfo.of(room, partnerMember, latestPartnerMessage));
         }
 
@@ -83,7 +91,7 @@ public class ChatRoomService {
         );
     }
 
-    // 채팅(룸) 삭제
+    // 채팅룸 삭제
     public void deleteChatRoom(Long chatRoomId) {
 
         ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)

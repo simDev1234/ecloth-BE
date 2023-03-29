@@ -9,6 +9,6 @@ import java.util.Optional;
 @Repository
 public interface ChatMessageRepository extends MongoRepository<ChatMessage, ObjectId> {
 
-    Optional<ChatMessage> findDistinctFirstByChatRoomIdAndWriterIdOrderByRegisterDate(Long chatRoomId, Long writerId);
+    Optional<ChatMessage> findDistinctFirstByChatRoomIdOrderByRegisterDate(Long chatRoomId);
 
 }

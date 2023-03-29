@@ -12,4 +12,6 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
 
     Page<ChatRoom> findByMembersContaining(Member member, Pageable pageable);
 
+    boolean existsByChatRoomIdAndMembersContaining(Long chatRoomId, Member member);
+
 }
