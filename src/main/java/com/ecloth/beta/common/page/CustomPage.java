@@ -4,6 +4,12 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import springfox.documentation.annotations.ApiIgnore;
+
+import java.util.Locale;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -25,12 +31,13 @@ public class CustomPage {
                 .build();
     }
 
-    public int getStartIdx(){
+    public int findStartIdx(){
         return this.size * (this.page - 1);
     }
 
-    public int getEndIdx(long total){
-        int endIdx = getStartIdx() + this.size;
+    public int findEndIdx(long total){
+        int endIdx = findStartIdx() + this.size;
         return (int) Math.min(total, endIdx);
     }
+
 }

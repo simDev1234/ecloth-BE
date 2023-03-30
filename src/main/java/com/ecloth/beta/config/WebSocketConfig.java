@@ -10,16 +10,17 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 @EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
-    // Stomp 에서 사용하는 메세지 브로커 설정
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
-        registry.setApplicationDestinationPrefixes("/api"); // api 시작 prefix 제거
-        registry.enableSimpleBroker("/room"); // 내장 메세지 브로커 (메세지 큐)에 저장
+        registry.setApplicationDestinationPrefixes("/app"); // pub
+        registry.enableSimpleBroker("/queue"); // sub - 1:1은 queue, 1:N는 topic
     }
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/endpoint").withSockJS(); // 핸드셰이크 위한 경로
+        registry.addEndpoint("/ws-connection")
+                .setAllowedOriginPatterns("*")
+                .withSockJS();
     }
 
 }

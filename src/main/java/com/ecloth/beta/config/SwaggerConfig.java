@@ -34,6 +34,9 @@ public class SwaggerConfig {
                 .consumes(getConsumeContentTypes())
                 .produces(getProduceContentTypes())
                 .useDefaultResponseMessages(false)
+                .enableUrlTemplating(true)
+                .protocols(new HashSet<>(Arrays.asList("websocket", "http", "https")))
+                // TODO 소켓 통한 경로 포함시키기
                 .apiInfo(apiInfo())
                 .select()
                 .apis(RequestHandlerSelectors.basePackage("com.ecloth.beta"))

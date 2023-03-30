@@ -136,7 +136,7 @@ public class FollowService {
     private List<MemberShortInfo> getSubFollowListByPage(CustomPage requestPage, List<Follow> followList) {
 
         long total = followList.size();
-        List<Follow> subFollowList = followList.subList(requestPage.getStartIdx(), requestPage.getEndIdx(total));
+        List<Follow> subFollowList = followList.subList(requestPage.findStartIdx(), requestPage.findEndIdx(total));
 
         return subFollowList.stream()
                 .map(Follow::getTarget)
@@ -147,7 +147,7 @@ public class FollowService {
     private List<MemberShortInfo> getSubFollowerListByPage(CustomPage requestPage, List<Follow> followList) {
 
         long total = followList.size();
-        List<Follow> subFollowList = followList.subList(requestPage.getStartIdx(), requestPage.getEndIdx(total));
+        List<Follow> subFollowList = followList.subList(requestPage.findStartIdx(), requestPage.findEndIdx(total));
 
         return subFollowList.stream()
                 .map(Follow::getRequester)
