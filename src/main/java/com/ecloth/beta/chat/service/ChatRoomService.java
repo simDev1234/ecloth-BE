@@ -1,10 +1,11 @@
 package com.ecloth.beta.chat.service;
 
 import com.ecloth.beta.chat.document.ChatMessage;
-import com.ecloth.beta.chat.dto.ChatRoomListResponse;
-import com.ecloth.beta.chat.dto.ChatRoomListResponse.ChatRoomInfo;
 import com.ecloth.beta.chat.dto.ChatRoomCreateRequest;
 import com.ecloth.beta.chat.dto.ChatRoomCreateResponse;
+import com.ecloth.beta.chat.dto.ChatRoomExitRequest;
+import com.ecloth.beta.chat.dto.ChatRoomListResponse;
+import com.ecloth.beta.chat.dto.ChatRoomListResponse.ChatRoomInfo;
 import com.ecloth.beta.chat.entity.ChatRoom;
 import com.ecloth.beta.chat.exception.ChatException;
 import com.ecloth.beta.chat.exception.ErrorCode;
@@ -21,6 +22,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import javax.transaction.Transactional;
 import java.util.*;
 
 /**
@@ -91,12 +93,26 @@ public class ChatRoomService {
         );
     }
 
+    // 채팅룸 나가기
+    @Transactional
+    public void exitFromChatRoom(ChatRoomExitRequest request) {
+
+        ChatRoom chatRoom = chatRoomRepository.findById(request.getChatMemberId())
+                .orElseThrow(() -> new ChatException(ErrorCode.CHAT_ROOM_NOT_FOUND));
+
+        Member member = memberRepository.findById(request.getMemberId())
+                .orElseThrow(() -> new UsernameNotFoundException("Member Not Found"));
+
+        chatRoom.getMembers().remove(member);
+
+        if (chatRoom.getMembers().size() == 0) {
+            deleteChatRoom(chatRoom);
+        }
+
+    }
+
     // 채팅룸 삭제
-    public void deleteChatRoom(Long chatRoomId) {
-
-        ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
-                        .orElseThrow(() -> new ChatException(ErrorCode.CHAT_ROOM_NOT_FOUND));
-
+    public void deleteChatRoom(ChatRoom chatRoom) {
         chatRoomRepository.delete(chatRoom);
     }
 

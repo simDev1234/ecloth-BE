@@ -1,5 +1,6 @@
 package com.ecloth.beta.chat.controller;
 
+import com.ecloth.beta.chat.dto.ChatRoomExitRequest;
 import com.ecloth.beta.chat.dto.ChatRoomListResponse;
 import com.ecloth.beta.chat.dto.ChatRoomCreateRequest;
 import com.ecloth.beta.chat.dto.ChatRoomCreateResponse;
@@ -40,10 +41,10 @@ public class ChatRoomController {
         return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping("/{chatRoomId}")
-    public ResponseEntity<Void> chatRoomDelete(@PathVariable Long chatRoomId){
+    @DeleteMapping
+    public ResponseEntity<Void> chatRoomExit(@Valid @RequestBody ChatRoomExitRequest request){
 
-        chatRoomService.deleteChatRoom(chatRoomId);
+        chatRoomService.exitFromChatRoom(request);
 
         return ResponseEntity.ok().build();
     }
