@@ -1,9 +1,11 @@
 package com.ecloth.beta.member.entity;
 
-import com.ecloth.beta.chat.entity.ChatRoom;
 import com.ecloth.beta.common.entity.BaseEntity;
 import com.ecloth.beta.follow.entity.Follow;
-import com.ecloth.beta.member.dto.InfoMeUpdateRequest;
+import com.ecloth.beta.member.dto.MemberPasswordUpdateRequest;
+import com.ecloth.beta.member.dto.MemberUpdateInfoRequest;
+import com.ecloth.beta.member.exception.ErrorCode;
+import com.ecloth.beta.member.exception.MemberException;
 import com.ecloth.beta.member.model.MemberRole;
 import com.ecloth.beta.member.model.MemberStatus;
 import lombok.AllArgsConstructor;
@@ -15,13 +17,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @Getter
-@Builder(toBuilder = true)
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @AuditOverride(forClass = BaseEntity.class)
@@ -58,8 +58,8 @@ public class Member extends BaseEntity implements Serializable {
     private LocalDateTime passwordResetRequestDate;
 
     // location
-    private String latitude;
-    private String longitude;
+    private int x;
+    private int y;
 
     // follow & follower
     @OneToMany(mappedBy = "requester")
@@ -67,15 +67,11 @@ public class Member extends BaseEntity implements Serializable {
     @OneToMany(mappedBy = "target")
     private List<Follow> followerList;
 
-    // chat room
-    @ManyToMany(mappedBy = "members")
-    private Set<ChatRoom> chatRooms = new HashSet<>();
-
     @Enumerated(EnumType.STRING)
     private MemberRole memberRole;
 
 
-    public void update(InfoMeUpdateRequest request, PasswordEncoder passwordEncoder) {
+    public void update(MemberUpdateInfoRequest request, PasswordEncoder passwordEncoder) {
         if (request.getNickname() != null) {
             this.nickname = request.getNickname();
         }
@@ -85,9 +81,30 @@ public class Member extends BaseEntity implements Serializable {
         if (request.getProfileImagePath() != null) {
             this.profileImagePath = request.getProfileImagePath();
         }
-        if (request.getPassword() != null) {
-            this.password = passwordEncoder.encode(request.getPassword());
+        if (request.getNewPassword() != null && request.getPassword() != null) {
+            if (!passwordEncoder.matches(request.getPassword(), this.password)) {
+                throw new MemberException(ErrorCode.WRONG_PASSWORD);
+            }
+            this.password = passwordEncoder.encode(request.getNewPassword());
         }
     }
 
+    public void updateMemberStatusToActive(LocalDateTime emailAuthDate){
+        this.memberStatus = MemberStatus.ACTIVE;
+        this.emailAuthDate = emailAuthDate;
+    }
+
+    public void updateMemberStatusToInactive() {
+        this.memberStatus = MemberStatus.INACTIVE;
+    }
+
+    public void setPasswordResetCodeAndRequestDate(String code, LocalDateTime requestDate) {
+        this.passwordResetCode = code;
+        this.passwordResetRequestDate = requestDate;
+    }
+
+    public void updateNewPassword(MemberPasswordUpdateRequest request, PasswordEncoder passwordEncoder) {
+        this.passwordResetCode = null;
+        this.password = passwordEncoder.encode(request.getNewPassword());
+    }
 }
