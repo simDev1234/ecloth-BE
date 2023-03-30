@@ -52,7 +52,7 @@ public class StompChatController {
     }
 
     private static String subscriptionURI(ChatMessageSendRequest request) {
-        return String.format("/queue/chat/room/%d", request.getChatRoomId());
+        return String.format("/queue/chat/%d", request.getChatRoomId());
     }
 
     private ChatMessageSendResponse chatMessageResponseAfterSavingToMongoDB(ChatMessageSendRequest request) {
