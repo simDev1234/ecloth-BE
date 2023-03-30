@@ -3,6 +3,7 @@ package com.ecloth.beta.member.repository;
 import com.ecloth.beta.member.entity.Member;
 import com.ecloth.beta.member.model.MemberStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
@@ -23,4 +24,7 @@ public interface MemberRepository extends JpaRepository<Member,Long> {
     boolean existsByEmail(String email);
 
     boolean existsByNickname(String nickname);
+
+    @Query("select m.nickname from Member m where m.memberId = :memberId")
+    String findNicknameByMemberId(Long memberId);
 }

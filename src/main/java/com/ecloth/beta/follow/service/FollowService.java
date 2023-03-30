@@ -34,15 +34,15 @@ public class FollowService {
     private final FollowRepository followRepository;
 
     // 팔로우
-    public FollowingResponse follow(String currentLoggedInMemberEmail, Long toMemberId) {
+    public FollowingResponse follow(Long requesterMemberId, Long targetMemberId) {
 
-        Member requester = memberRepository.findByEmail(currentLoggedInMemberEmail)
+        Member requester = memberRepository.findById(requesterMemberId)
                 .orElseThrow(() -> new RuntimeException("Member Not Found"));
 
-        Member target = memberRepository.findById(toMemberId)
+        Member target = memberRepository.findById(targetMemberId)
                 .orElseThrow(() -> new RuntimeException("Member Not Found"));
 
-        if (!isFollowing(currentLoggedInMemberEmail, toMemberId)) {
+        if (!isFollowing(requesterMemberId, targetMemberId)) {
             followRepository.save(Follow.builder().requester(requester).target(target).build());
         }
 
@@ -50,64 +50,22 @@ public class FollowService {
     }
 
     // 팔로우 상태 조회
-    public boolean isFollowing(String currentLoggedInMemberEmail, Long toMemberId) {
-
-        Optional<Follow> optionalFollow
-                = followRepository.findByRequesterEmailAndTargetId(currentLoggedInMemberEmail, toMemberId);
-
+    public boolean isFollowing(Long requesterMemberId, Long targetMemberId) {
+        Optional<Follow> optionalFollow = followRepository.findByRequesterIdAndTargetId(requesterMemberId, targetMemberId);
         return optionalFollow.isPresent();
     }
 
-    // 로그인 회원의 닉네임, 프로필, 팔로우수, 팔로워수 정보 조회
-    public FollowingResponse findMemberFollowInfo(String currentLoggedInMemberEmail) {
-
-        Member member = memberRepository.findByEmail(currentLoggedInMemberEmail)
-                .orElseThrow(() -> new FollowException(FOLLOW_REQUESTER_NOT_FOUND));
-
-        return FollowingResponse.fromEntity(member, true);
-    }
-
-    // 특정 회원의 닉네임, 프로필, 팔로우수, 팔로워수 정보 조회
-    public FollowingResponse findMemberFollowInfo(String currentLoggedInMemberEmail, Long memberId) {
+    // 회원의 닉네임, 프로필, 팔로우수, 팔로워수 정보 조회
+    public FollowingResponse findMemberFollowInfo(Long memberId) {
 
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new FollowException(FOLLOW_REQUESTER_NOT_FOUND));
 
-        if (isFollowing(currentLoggedInMemberEmail, memberId)) {
-            return FollowingResponse.fromEntity(member, true);
-        }
-
         return FollowingResponse.fromEntity(member, false);
     }
 
-    // 로그인 회원이 팔로우하고 있는 회원 목록
-    public FollowListResponse findFollowList(String currentLoggedInMemberEmail, CustomPage requestPage) {
-
-        List<Follow> followList = followRepository.findFollowListByRequesterEmail(currentLoggedInMemberEmail);
-
-        if (CollectionUtils.isEmpty(followList)) {
-            return FollowListResponse.fromEmpty(FOLLOWS, requestPage);
-        }
-
-        List<MemberShortInfo> subFollowList = getSubFollowListByPage(requestPage, followList);
-        return FollowListResponse.fromEntity(FOLLOWS, requestPage, subFollowList);
-    }
-
-    // 로그인 회원을 팔로우하고 있는 회원 목록
-    public FollowListResponse findFollowerList(String currentLoggedInMemberEmail, CustomPage requestPage) {
-
-        List<Follow> followerList = followRepository.findFollowerListByTargetEmail(currentLoggedInMemberEmail);
-
-        if (CollectionUtils.isEmpty(followerList)) {
-            return FollowListResponse.fromEmpty(FOLLOWERS, requestPage);
-        }
-
-        List<MemberShortInfo> subFollowerList = getSubFollowerListByPage(requestPage, followerList);
-        return FollowListResponse.fromEntity(FOLLOWERS, requestPage, subFollowerList);
-    }
-
-    // 특정 회원이 팔로우하고 있는 회원 목록
-     public FollowListResponse findFollowList(Long memberId, CustomPage requestPage) {
+    // 팔로우 회원 목록
+     public FollowListResponse findFollowMemberList(Long memberId, CustomPage requestPage) {
 
         List<Follow> followList = followRepository.findFollowListByRequesterId(memberId);
 
@@ -119,8 +77,19 @@ public class FollowService {
         return FollowListResponse.fromEntity(FOLLOWS, requestPage, subFollowList);
     }
 
-    // 특정 회원을 팔로우하고 있는 회원 목록
-    public FollowListResponse findFollowerList(Long memberId, CustomPage requestPage) {
+    private List<MemberShortInfo> getSubFollowListByPage(CustomPage requestPage, List<Follow> followList) {
+
+        long total = followList.size();
+        List<Follow> subFollowList = followList.subList(requestPage.findStartIdx(), requestPage.findEndIdx(total));
+
+        return subFollowList.stream()
+                .map(Follow::getTarget)
+                .map(MemberShortInfo::fromEntity)
+                .collect(Collectors.toList());
+    }
+
+    // 팔로워 회원 목록
+    public FollowListResponse findFollowerMemberList(Long memberId, CustomPage requestPage) {
 
         List<Follow> followerList = followRepository.findFollowerListByTargetId(memberId);
 
@@ -131,17 +100,6 @@ public class FollowService {
         List<MemberShortInfo> subFollowerList = getSubFollowerListByPage(requestPage, followerList);
         return FollowListResponse.fromEntity(FOLLOWERS, requestPage, subFollowerList);
 
-    }
-
-    private List<MemberShortInfo> getSubFollowListByPage(CustomPage requestPage, List<Follow> followList) {
-
-        long total = followList.size();
-        List<Follow> subFollowList = followList.subList(requestPage.findStartIdx(), requestPage.findEndIdx(total));
-
-        return subFollowList.stream()
-                .map(Follow::getTarget)
-                .map(MemberShortInfo::fromEntity)
-                .collect(Collectors.toList());
     }
 
     private List<MemberShortInfo> getSubFollowerListByPage(CustomPage requestPage, List<Follow> followList) {
@@ -156,8 +114,8 @@ public class FollowService {
     }
 
     // 언팔로우
-    public void unfollow(String email, Long targetId) {
-        followRepository.findByRequesterEmailAndTargetId(email, targetId)
+    public void unfollow(Long requesterId, Long targetId) {
+        followRepository.findByRequesterIdAndTargetId(requesterId, targetId)
                         .ifPresent(followRepository::delete);
     }
 

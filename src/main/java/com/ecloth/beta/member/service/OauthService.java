@@ -1,5 +1,6 @@
 package com.ecloth.beta.member.service;
 
+
 import com.ecloth.beta.common.jwt.JwtTokenProvider;
 import com.ecloth.beta.member.dto.KakaoProfileRequest;
 import com.ecloth.beta.member.dto.OauthToken;
@@ -97,9 +98,10 @@ public class OauthService {
         // 유저정보 받기
         KakaoProfileRequest userInfo = getUserInfo(token);
         // 최초 로그인시 회원정보 저장
-        Member kakaoMember = memberRepository.findByEmail(userInfo.getKakao_account().getEmail())
+        memberRepository.findByEmail(userInfo.getKakao_account().getEmail())
                 .orElseGet(() -> {
-                    Member newMember = Member.builder()
+
+                    Member kakaoNewMember = Member.builder()
                             .email(userInfo.getKakao_account().getEmail())
                             .nickname(userInfo.getProperties().getNickname())
                             .profileImagePath(userInfo.getProperties().getProfile_image())
@@ -108,13 +110,13 @@ public class OauthService {
                             .build();
 
                     log.info("사이트 최초 로그인 회원정보저장");
-                    return memberRepository.save(newMember);
+                    return memberRepository.save(kakaoNewMember);
                 });
         // JWT 토큰 생성
-        Token jwtDto = jwtTokenProvider.generateToken(kakaoMember.getMemberId());
+        Token jwtDto = jwtTokenProvider.generateToken(userInfo.getKakao_account().getEmail());
         // Redis 에 JWT Refresh 토큰 저장
         redisTemplate.opsForValue()
-                .set("RT:" + kakaoMember.getMemberId(),
+                .set("RT:" + userInfo.getKakao_account().getEmail(),
                         jwtDto.getRefreshToken(), jwtDto.getRefreshTokenExpirationTime(), TimeUnit.MILLISECONDS);
 
         // Redis 에 Kakao Refresh 토큰 저장
@@ -125,7 +127,7 @@ public class OauthService {
         log.info("해시맵에서 불러온 주소 : " + oauthTokenMap.get(token));
 
         redisTemplate.opsForValue()
-                .set("KRT:" + kakaoMember.getMemberId(),
+                .set("KRT:" + userInfo.getKakao_account().getEmail(),
                         oauthToken.getRefresh_token(), oauthToken.getRefresh_token_expires_in(), TimeUnit.SECONDS);
         oauthTokenMap.remove(token); //Redis에 저장 후 oauthTokenMap에 담긴 정보 삭제
         log.info("해시맵정보 레디스 저장후 삭제 확인 null : " + oauthTokenMap.get(token));
@@ -180,7 +182,7 @@ public class OauthService {
 
     // 카카오 토큰 갱신
     @Transactional
-    public void reissueKakaoToken(String redisKRT, String memberId) {
+    public void reissueKakaoToken(String redisKRT, String email) {
         // HttpHeader 생성
         HttpHeaders headers = new HttpHeaders();
         headers.add("Content-type", "application/x-www-form-urlencoded;charset=utf-8");
@@ -213,7 +215,7 @@ public class OauthService {
 
         // Redis 에 새로운 카카오 RefreshToken 저장
         redisTemplate.opsForValue()
-                .set("KRT:" + memberId, oauthToken.getRefresh_token()
+                .set("KRT:" + email, oauthToken.getRefresh_token()
                         , oauthToken.getRefresh_token_expires_in(), TimeUnit.SECONDS);
         log.info("카카오토큰갱신 AT : " + oauthToken.getAccess_token());
         log.info("카카오토큰갱신 RT : " + oauthToken.getRefresh_token());
