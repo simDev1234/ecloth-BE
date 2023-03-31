@@ -1,7 +1,6 @@
-package com.ecloth.beta.domain.post.dto;
+package com.ecloth.beta.domain.post.comment.dto;
 
 import com.ecloth.beta.common.page.CustomPage;
-import com.ecloth.beta.domain.post.comment.dto.CommentResponse;
 import com.ecloth.beta.domain.post.comment.entity.Comment;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;

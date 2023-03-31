@@ -1,4 +1,4 @@
-package com.ecloth.beta.domain.post.dto;
+package com.ecloth.beta.domain.post.posting.dto;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

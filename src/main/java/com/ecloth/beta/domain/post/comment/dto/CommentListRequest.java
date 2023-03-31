@@ -1,4 +1,4 @@
-package com.ecloth.beta.domain.post.dto;
+package com.ecloth.beta.domain.post.comment.dto;
 
 import com.ecloth.beta.common.page.CustomPage;
 import lombok.Getter;

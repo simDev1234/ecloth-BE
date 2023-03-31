@@ -1,22 +1,13 @@
 package com.ecloth.beta.domain.post.posting.controller;
 
-import com.ecloth.beta.domain.post.dto.PostingLikeRequest;
+import com.ecloth.beta.domain.post.posting.dto.PostingLikeRequest;
 import com.ecloth.beta.domain.post.posting.dto.*;
-import com.ecloth.beta.domain.post.posting.entity.Posting;
 import com.ecloth.beta.domain.post.posting.repository.PostingRepository;
 import com.ecloth.beta.domain.post.posting.service.PostingService;
 import io.swagger.annotations.Api;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import springfox.documentation.annotations.ApiIgnore;
-import java.security.Principal;
-import java.util.List;
-import java.util.Map;
 
 /**
  * 포스트 API
