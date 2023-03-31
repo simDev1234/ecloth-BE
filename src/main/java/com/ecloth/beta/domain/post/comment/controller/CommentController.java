@@ -34,7 +34,7 @@ public class CommentController {
 
     }
 
-    @GetMapping("/{postingId}")
+    @GetMapping("/{postingId}/comment")
     public ResponseEntity<CommentListResponse> commentList(@PathVariable Long postingId,
                                                        CommentListRequest request) {
 
