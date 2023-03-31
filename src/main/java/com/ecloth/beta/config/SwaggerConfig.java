@@ -30,18 +30,21 @@ public class SwaggerConfig {
     @Bean
     public Docket api() {
         return new Docket(DocumentationType.OAS_30)
+                // host
                 .host(host.substring(7))
+                // content type
                 .consumes(getConsumeContentTypes())
                 .produces(getProduceContentTypes())
-                .useDefaultResponseMessages(false)
-                .enableUrlTemplating(true)
-                .protocols(new HashSet<>(Arrays.asList("websocket", "http", "https")))
-                // TODO 소켓 통한 경로 포함시키기
+                // protocol
+                .protocols(new HashSet<>(Arrays.asList("http", "https")))
+                // api information
                 .apiInfo(apiInfo())
                 .select()
                 .apis(RequestHandlerSelectors.basePackage("com.ecloth.beta"))
+                // api paths
                 .paths(PathSelectors.any())
                 .build()
+                // security - authorization header
                 .securityContexts(Arrays.asList(securityContext()))
                 .securitySchemes(Arrays.asList(apiKey()));
     }
@@ -49,6 +52,7 @@ public class SwaggerConfig {
     private Set<String> getConsumeContentTypes() {
         Set<String> consumes = new HashSet<>();
         consumes.add("application/json;charset=UTF-8");
+        consumes.add("application/x-www-form-urlencoded;charset=UTF-8");
         return consumes;
     }
 

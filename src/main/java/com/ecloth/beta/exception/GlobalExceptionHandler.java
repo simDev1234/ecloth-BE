@@ -1,7 +1,10 @@
 package com.ecloth.beta.exception;
 
-import com.ecloth.beta.follow.exception.ErrorCode;
-import com.ecloth.beta.follow.exception.FollowException;
+import com.ecloth.beta.domain.chat.exception.ChatException;
+import com.ecloth.beta.domain.follow.exception.ErrorCode;
+import com.ecloth.beta.domain.follow.exception.FollowException;
+import com.ecloth.beta.domain.member.exception.MemberErrorCode;
+import com.ecloth.beta.domain.member.exception.MemberException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +23,23 @@ public class GlobalExceptionHandler {
 
         return new ResponseEntity<>(response, errorCode.getHttpStatus());
     }
+
+    @ExceptionHandler
+    public ResponseEntity<ErrorResponse> handleChatException(ChatException e){
+
+        ErrorResponse response = new ErrorResponse(e.getErrorCode().name(), e.getErrorCode().getMessage());
+
+        return new ResponseEntity<>(response, e.getErrorCode().getHttpStatus());
+    }
+
+    @ExceptionHandler(MemberException.class)
+    public ResponseEntity<ErrorResponse> handleMemberException(MemberException e) {
+        MemberErrorCode errorCode = e.getMemberErrorCode();
+        ErrorResponse errorResponse = new ErrorResponse(errorCode.name(), errorCode.getDetail());
+
+        return new ResponseEntity<>(errorResponse, errorCode.getHttpStatus());
+    }
+
 
     @ExceptionHandler
     public ResponseEntity<ErrorResponse> handleUsernameNotFoundException(UsernameNotFoundException e){
