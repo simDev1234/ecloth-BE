@@ -55,7 +55,7 @@ public class PostingController {
     }
 
     // 회원이 작성한 포스트 목록 조회
-    @GetMapping("/feed/post/{memberId}")
+    @GetMapping("/feed/post/member/{memberId}")
     public ResponseEntity<MemberPostingListResponse> memberPostList(@PathVariable Long memberId,
                                             MemberPostingListRequest request) {
 

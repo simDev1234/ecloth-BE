@@ -7,6 +7,7 @@ import com.ecloth.beta.security.jwt.JwtTokenUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -46,8 +47,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     public static final String[] PERMIT_API_URL_ARRAY ={
             // api
             "/","/api/register","/api/register/email-auth/**","/api/login", "/api/register/email-auth",
-            "/KakaoLogin/**","/api/member/{param}/follows","/api/feed/post","/api/feed/post/{post_id}","/api/member/resetPassword",
-            "/api/member/resetPassword/update", "/api/member/{memberId}/follow/**"
+            "/KakaoLogin","/KakaoLogin/**","/api/member/{param}/follows","/api/member/resetPassword",
+            "/api/member/resetPassword/update", "/api/member/{memberId}/follow/**","/temperature/images"
+    };
+
+    public static final String[] PERMIT_GET_URL_ARRAY = {
+            // 전체 포스트 목록 조회, 특정회원 포스트 목록 조회, 포스트 상세 조회, 댓글 조회, 대댓글 조회,
+            "/api/feed/post","/api/feed/post/member/{memberId}","/api/feed/post/{postingId}","/api/feed/post/{postingId}/comment","/api/feed/post/comment/{commentId}"
     };
 
     @Override
@@ -72,6 +78,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .antMatchers(PERMIT_URL_ARRAY).permitAll()
                 .antMatchers(PERMIT_API_URL_ARRAY).permitAll()
+                .antMatchers(HttpMethod.GET,PERMIT_GET_URL_ARRAY).permitAll()
 
                 .and()
                 .authorizeRequests()
