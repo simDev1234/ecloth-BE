@@ -1,6 +1,8 @@
 package com.ecloth.beta.domain.post.posting.service;
 
 import com.ecloth.beta.domain.member.entity.Member;
+import com.ecloth.beta.domain.member.exception.MemberErrorCode;
+import com.ecloth.beta.domain.member.exception.MemberException;
 import com.ecloth.beta.domain.member.repository.MemberRepository;
 import com.ecloth.beta.domain.post.posting.dto.*;
 import com.ecloth.beta.domain.post.posting.entity.Image;
@@ -131,8 +133,16 @@ public class PostingService {
         return String.format("like:%d-%d", postingId,memberId);
     }
 
-    public void deletePost(Long postingId) {
+    public void deletePost(Long postingId, Long memberId) {
+        // 게시글 조회
+        Posting posting = postingRepository.findById(postingId)
+                .orElseThrow(() -> new RuntimeException("Posting Not Found"));
 
+        if (!posting.getWriter().getMemberId().equals(memberId)) {
+            throw new RuntimeException("Only writer can delete the posting.");
+        }
+
+        postingRepository.delete(posting);
     }
 
 }
