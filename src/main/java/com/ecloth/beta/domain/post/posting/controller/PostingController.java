@@ -4,10 +4,14 @@ import com.ecloth.beta.domain.post.posting.dto.PostingLikeRequest;
 import com.ecloth.beta.domain.post.posting.dto.*;
 import com.ecloth.beta.domain.post.posting.repository.PostingRepository;
 import com.ecloth.beta.domain.post.posting.service.PostingService;
+import com.ecloth.beta.security.memberDetail.MemberDetails;
 import io.swagger.annotations.Api;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import springfox.documentation.annotations.ApiIgnore;
 
 /**
  * 포스트 API
@@ -24,8 +28,17 @@ public class PostingController {
     private final PostingRepository postingRepository;
 
     // 포스트 등록
-    @PostMapping("/feed/post")
-    public ResponseEntity<Void> postCreate(@RequestBody PostingCreateRequest request) {
+    @PostMapping(value = "/feed/post",consumes = {"multipart/form-data"})
+    public ResponseEntity<Void> postCreate(@RequestParam("images") MultipartFile[] images,
+                                           @RequestParam("memberId") Long memberId,
+                                           @RequestParam("title") String title,
+                                           @RequestParam("content") String content) {
+
+        PostingCreateRequest request = new PostingCreateRequest();
+        request.setImages(images);
+        request.setMemberId(memberId);
+        request.setTitle(title);
+        request.setContent(content);
 
         postingService.createPost(request);
 
@@ -42,7 +55,7 @@ public class PostingController {
     }
 
     // 회원이 작성한 포스트 목록 조회
-    @GetMapping("/{memberId}")
+    @GetMapping("/feed/post/{memberId}")
     public ResponseEntity<MemberPostingListResponse> memberPostList(@PathVariable Long memberId,
                                             MemberPostingListRequest request) {
 
@@ -76,6 +89,14 @@ public class PostingController {
                                          @RequestBody PostingLikeRequest request) {
 
         postingService.checkOrUnCheckLike(postingId, request.getMemberId());
+
+        return ResponseEntity.ok().build();
+    }
+
+    // 포스트 삭제
+    @DeleteMapping("/feed/post/{postingId}")
+    public ResponseEntity<Void> postDelete(@ApiIgnore @AuthenticationPrincipal MemberDetails memberDetails,@PathVariable Long postingId) {
+        postingService.deletePost(memberDetails.getMemberId(),postingId);
 
         return ResponseEntity.ok().build();
     }
