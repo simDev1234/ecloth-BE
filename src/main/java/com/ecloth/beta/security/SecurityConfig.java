@@ -100,11 +100,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
 
-        config.setAllowCredentials(true); // 서버가 응답 시 json을 자바스크립트에서 처리할 수 있게 허용877
+        config.setAllowCredentials(true); // 서버가 응답 시 json을 자바스크립트에서 처리할 수 있게 허용
 //        config.addAllowedOrigin("*"); // 모든 ip에 응답을 허용
         config.addAllowedOriginPattern( "*"); // 모든 ip에 응답을 허용
         config.addAllowedHeader("*"); // 모든 header에 응답을 허용
         config.addAllowedMethod("*"); // 모든 요청을 허용
+        config.addExposedHeader("Authorization"); //Authorization 헤더 응답 허용
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
