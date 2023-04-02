@@ -16,6 +16,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
+import javax.persistence.EntityNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -133,17 +135,25 @@ public class PostingService {
         return String.format("like:%d-%d", postingId,memberId);
     }
 
+
     public void deletePost(Long postingId, Long memberId) {
         // 게시글 조회
         Posting posting = postingRepository.findById(postingId)
-                .orElseThrow(() -> new RuntimeException("Posting Not Found"));
+                .orElseThrow(() -> new EntityNotFoundException("Posting with id " + postingId + " not found"));
 
         if (!posting.getWriter().getMemberId().equals(memberId)) {
             throw new RuntimeException("Only writer can delete the posting.");
         }
 
+        // 해당 게시글에 연관된 Image 엔티티 삭제
+        for (Image image : posting.getImageList()) {
+            imageRepository.delete(image);
+        }
+
+        // 게시글 삭제
         postingRepository.delete(posting);
     }
+
 
 }
 
