@@ -40,8 +40,14 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
         String requestURI = ((HttpServletRequest) request).getRequestURI();
 
         // 요청 url이 허용된 url 리스트에 포함되어 있는지 확인
-        if (Arrays.asList(PERMIT_API_URL_ARRAY).contains(requestURI) || Arrays.asList(PERMIT_URL_ARRAY).contains(requestURI)
-            || Arrays.asList(PERMIT_GET_URL_ARRAY).contains(requestURI)) {
+        if (Arrays.asList(PERMIT_GET_URL_ARRAY).contains(requestURI)) {
+            // GET 요청인 경우 요청 url이 PERMIT_GET_URL_ARRAY에 포함된 경우에만 처리.
+            String method = ((HttpServletRequest) request).getMethod();
+            if ("GET".equals(method)) {
+                chain.doFilter(request, response);
+                return;
+            }
+        } else if (Arrays.asList(PERMIT_API_URL_ARRAY).contains(requestURI) || Arrays.asList(PERMIT_URL_ARRAY).contains(requestURI)) {
             chain.doFilter(request, response);
             return;
         }
