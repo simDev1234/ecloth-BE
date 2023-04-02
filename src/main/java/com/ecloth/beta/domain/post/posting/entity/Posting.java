@@ -30,8 +30,8 @@ public class Posting extends BaseEntity {
     private String title;
     private String content;
 
-    @OneToMany(mappedBy = "posting")
-    private List<Image> imageList = new ArrayList<>();
+    @OneToMany(mappedBy = "posting", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Image> imageList;
     @OneToMany(mappedBy = "posting")
     private List<Comment> commentList = new ArrayList<>();
 
