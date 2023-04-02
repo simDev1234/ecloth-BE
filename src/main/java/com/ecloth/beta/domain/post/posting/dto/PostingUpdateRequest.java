@@ -10,7 +10,6 @@ import org.springframework.web.multipart.MultipartFile;
 @Setter
 public class PostingUpdateRequest {
 
-    private Long memberId;
     private String title;
     private String content;
     private MultipartFile[] images;

@@ -20,6 +20,8 @@ public interface PostingRepository extends JpaRepository<Posting, Long>, Posting
 
     Page<Posting> findByWriter(Member writer, Pageable pageable);
 
+    boolean existsById(Long postingId);
+
 }
 
 

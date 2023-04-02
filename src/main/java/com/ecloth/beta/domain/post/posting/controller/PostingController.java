@@ -7,11 +7,15 @@ import com.ecloth.beta.domain.post.posting.service.PostingService;
 import com.ecloth.beta.security.memberDetail.MemberDetails;
 import io.swagger.annotations.Api;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 import springfox.documentation.annotations.ApiIgnore;
+
+import javax.persistence.EntityNotFoundException;
 
 /**
  * 포스트 API
@@ -30,7 +34,7 @@ public class PostingController {
     // 포스트 등록
     @PostMapping(value = "/feed/post",consumes = {"multipart/form-data"})
     public ResponseEntity<Void> postCreate(@RequestParam("images") MultipartFile[] images,
-                                           @RequestParam("memberId") @ApiIgnore @AuthenticationPrincipal MemberDetails memberDetails,
+                                           @ApiIgnore @AuthenticationPrincipal MemberDetails memberDetails,
                                            @RequestParam("title") String title,
                                            @RequestParam("content") String content) {
 
@@ -56,10 +60,10 @@ public class PostingController {
 
     // 회원이 작성한 포스트 목록 조회
     @GetMapping("/feed/post/member/{memberId}")
-    public ResponseEntity<MemberPostingListResponse> memberPostList(@ApiIgnore @AuthenticationPrincipal MemberDetails memberDetails,
-                                            MemberPostingListRequest request) {
+    public ResponseEntity<MemberPostingListResponse> memberPostList(@PathVariable Long memberId,
+                                                                    MemberPostingListRequest request) {
 
-        MemberPostingListResponse response = postingService.getMemberPostList(memberDetails.getMemberId(), request);
+        MemberPostingListResponse response = postingService.getMemberPostList(memberId,request);
 
         return ResponseEntity.ok(response);
     }
@@ -76,6 +80,7 @@ public class PostingController {
     // 포스트 수정
     @PutMapping("/feed/post/{postingId}")
     public ResponseEntity<Void> postUpdate(@RequestBody PostingUpdateRequest request,
+
                                            @PathVariable Long postingId) {
 
         postingService.updatePost(postingId, request);
@@ -94,11 +99,24 @@ public class PostingController {
     }
 
     // 포스트 삭제
-    @DeleteMapping("/feed/post/{postingId}")
-    public ResponseEntity<Void> postDelete(@ApiIgnore @AuthenticationPrincipal MemberDetails memberDetails,@PathVariable Long postingId) {
-        postingService.deletePost(memberDetails.getMemberId(),postingId);
+//    @DeleteMapping("/feed/post/{postingId}")
+//    public ResponseEntity<Void> postDelete(@ApiIgnore @AuthenticationPrincipal MemberDetails memberDetails
+//            ,@PathVariable Long postingId) {
+//        postingService.deletePost(memberDetails.getMemberId(),postingId);
+//
+//        return ResponseEntity.ok().build();
+//    }
 
-        return ResponseEntity.ok().build();
+    @DeleteMapping("/feed/post/{postingId}")
+    public ResponseEntity<Void> postDelete(@ApiIgnore @AuthenticationPrincipal MemberDetails memberDetails, @PathVariable Long postingId) {
+        try {
+            postingService.deletePost(postingId, memberDetails.getMemberId());
+            return ResponseEntity.ok().build();
+        } catch (EntityNotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+        }
     }
 
 }
