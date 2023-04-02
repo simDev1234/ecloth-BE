@@ -12,7 +12,7 @@ import java.util.Map;
 
 @RestController
 @Api(tags = "옷차림API")
-@RequestMapping("/temperature")
+@RequestMapping("/api/temperature")
 public class TemperatureController {
     private final TemperatureService temperatureService;
 
