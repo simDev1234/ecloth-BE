@@ -30,13 +30,13 @@ public class PostingController {
     // 포스트 등록
     @PostMapping(value = "/feed/post",consumes = {"multipart/form-data"})
     public ResponseEntity<Void> postCreate(@RequestParam("images") MultipartFile[] images,
-                                           @RequestParam("memberId") Long memberId,
+                                           @RequestParam("memberId") @ApiIgnore @AuthenticationPrincipal MemberDetails memberDetails,
                                            @RequestParam("title") String title,
                                            @RequestParam("content") String content) {
 
         PostingCreateRequest request = new PostingCreateRequest();
         request.setImages(images);
-        request.setMemberId(memberId);
+        request.setMemberId(memberDetails.getMemberId());
         request.setTitle(title);
         request.setContent(content);
 
@@ -56,10 +56,10 @@ public class PostingController {
 
     // 회원이 작성한 포스트 목록 조회
     @GetMapping("/feed/post/member/{memberId}")
-    public ResponseEntity<MemberPostingListResponse> memberPostList(@PathVariable Long memberId,
+    public ResponseEntity<MemberPostingListResponse> memberPostList(@ApiIgnore @AuthenticationPrincipal MemberDetails memberDetails,
                                             MemberPostingListRequest request) {
 
-        MemberPostingListResponse response = postingService.getMemberPostList(memberId, request);
+        MemberPostingListResponse response = postingService.getMemberPostList(memberDetails.getMemberId(), request);
 
         return ResponseEntity.ok(response);
     }

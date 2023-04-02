@@ -7,10 +7,12 @@ import org.springframework.stereotype.Service;
 public class TemperatureService {
     private String s3BucketUrl = "https://s3.amazonaws.com/weatheroutfit/";
 
-    public String getImageUrlByTemperature(double temperature) {
+    public String[] getImageUrlsByTemperature(double temperature) {
         int level = getTemperatureLevel(temperature);
-        String imageUrl = "image-" + level + ".jpeg";
-        return s3BucketUrl + imageUrl;
+        String[] imageUrls = new String[2];
+        imageUrls[0] = s3BucketUrl + level + "_rain.jpeg";
+        imageUrls[1] = s3BucketUrl + level + ".jpeg";
+        return imageUrls;
     }
 
     private int getTemperatureLevel(double temperature) {

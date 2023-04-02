@@ -22,19 +22,8 @@ public class TemperatureController {
     }
 
     @GetMapping("/images")
-    public ResponseEntity<Map<String, String>> getTemperatureImages(@RequestParam int temperature) {
-        Map<String, String> images = new HashMap<>();
-        String imageUrl1 = temperatureService.getImageUrlByTemperature(temperature);
-        images.put("image1", imageUrl1);
-
-        String imageUrl2;
-        if (temperature >= 1 && temperature <= 8) {
-            imageUrl2 = temperatureService.getImageUrlByTemperature(Double.parseDouble(temperature + "_rain"));
-        } else {
-            imageUrl2 = "";
-        }
-        images.put("image2", imageUrl2);
-
-        return ResponseEntity.ok(images);
+    public ResponseEntity<String[]> getImageUrlsByTemperature(@RequestParam double temperature) {
+        String[] imageUrls = temperatureService.getImageUrlsByTemperature(temperature);
+        return ResponseEntity.ok(imageUrls);
     }
 }

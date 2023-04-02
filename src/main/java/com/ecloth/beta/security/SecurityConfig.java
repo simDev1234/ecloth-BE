@@ -48,7 +48,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             // api
             "/","/api/register","/api/register/email-auth/**","/api/login", "/api/register/email-auth",
             "/KakaoLogin","/KakaoLogin/**","/api/member/{param}/follows","/api/member/resetPassword",
-            "/api/member/resetPassword/update", "/api/member/{memberId}/follow/**","/temperature/images"
+            "/api/member/resetPassword/update", "/api/member/{memberId}/follow/**","/api/temperature/images"
     };
 
     public static final String[] PERMIT_GET_URL_ARRAY = {
