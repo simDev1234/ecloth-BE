@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.ecloth.beta.domain.post.comment.exception.ErrorCode.COMMENT_NOT_FOUND;
+import static com.ecloth.beta.domain.post.comment.exception.ErrorCode.NOT_COMMENT_WRITER;
 import static com.ecloth.beta.domain.post.posting.exception.ErrorCode.POSTING_NOT_FOUND;
 
 @Service
@@ -71,6 +72,11 @@ public class CommentService {
 
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new CommentException(COMMENT_NOT_FOUND));
+
+        // 댓글 작성자와 request 작성자 id 비교
+        if (!comment.getWriter().getMemberId().equals(commentRequest.getMemberId())) {
+            throw new CommentException(NOT_COMMENT_WRITER);
+        }
 
         comment.updateContent(commentRequest.getContent());
         commentRepository.save(comment);
