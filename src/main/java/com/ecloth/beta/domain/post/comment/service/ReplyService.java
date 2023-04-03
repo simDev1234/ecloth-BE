@@ -14,11 +14,13 @@ import com.ecloth.beta.domain.post.comment.repository.CommentRepository;
 import com.ecloth.beta.domain.post.comment.repository.ReplyRepository;
 import com.ecloth.beta.domain.post.posting.repository.PostingRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class ReplyService {
 
@@ -35,6 +37,7 @@ public class ReplyService {
 
         Member replyWriter = memberRepository.findById(replyRequest.getMemberId())
                 .orElseThrow(() -> new CommentException(ErrorCode.REPLY_NOT_FOUND));
+        log.info("대댓글 요청자 ID : "+ replyRequest.getMemberId());
 
         validateIfPostingWriterAndReplyWriterMatching(parentComment, replyWriter);
 
@@ -45,11 +48,14 @@ public class ReplyService {
 
     private void validateIfPostingWriterAndReplyWriterMatching(Comment parentComment, Member replyWriter) {
 
-        Long postingWriterId = parentComment.getPosting().getWriter().getMemberId();
+        Long postingId = parentComment.getPosting().getPostingId();
         Long replyWriterId = replyWriter.getMemberId();
+        log.info("게시물ID : " +postingId + ",   대댓글작성요청자 : "+replyWriterId);
 
         boolean isPostingWriterAndReplyWriterMatching
-                = postingRepository.isPostingWriterAndReplyWriterMatching(postingWriterId, replyWriterId);
+                = postingRepository.isPostingWriterAndReplyWriterMatching(postingId, replyWriterId);
+
+        log.info("게시물작성자와 대댓글요청자 일치여부 확인 : " + isPostingWriterAndReplyWriterMatching);
 
         if (!isPostingWriterAndReplyWriterMatching) {
             throw new CommentException(ErrorCode.POSTING_WRITER_REPLY_WRITER_NOT_MATCHING);

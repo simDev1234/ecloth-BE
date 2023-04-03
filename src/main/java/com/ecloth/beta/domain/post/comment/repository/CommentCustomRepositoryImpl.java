@@ -51,6 +51,30 @@ public class CommentCustomRepositoryImpl implements CommentCustomRepository{
         return new PageImpl<>(commentList, pageable, total);
     }
 
+    @Override
+    public Page<Comment> findByPostingIdJoinedWithMember(Long postingId, Pageable pageable) {
+        QComment comment = QComment.comment;
+        QMember member = QMember.member;
+
+        List<Comment> commentList = jpaQueryFactory
+                .selectFrom(comment)
+                .join(comment.writer, member)
+                .fetchJoin()
+                .where(comment.posting.postingId.eq(postingId))
+                .orderBy(getOrderSpecifier(pageable.getSort()).stream().toArray(OrderSpecifier[]::new))
+                .offset(pageable.getPageNumber() - 1)
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        long total = jpaQueryFactory
+                .select(comment.count())
+                .from(comment)
+                .where(comment.posting.postingId.eq(postingId))
+                .fetchOne();
+
+        return new PageImpl<>(commentList, pageable, total);
+    }
+
     private List<OrderSpecifier> getOrderSpecifier(Sort sort) {
 
         List<OrderSpecifier> orders = new ArrayList<>();

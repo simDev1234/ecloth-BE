@@ -10,6 +10,7 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Getter
 @Setter
@@ -26,30 +27,40 @@ public class CommentResponse {
     private LocalDateTime updatedDate;
 
     public static CommentResponse fromEntity(Comment comment, Member writer) {
-        return CommentResponse.builder()
+        CommentResponse.CommentResponseBuilder builder = CommentResponse.builder()
                 .commentId(comment.getCommentId())
                 .writerId(writer.getMemberId())
                 .nickname(writer.getNickname())
                 .profileImagePath(writer.getProfileImagePath())
                 .content(comment.getContent())
-                .reply(ReplyResponse.fromEntity(comment.getReply()))
                 .registerDate(comment.getRegisterDate())
-                .updatedDate(comment.getUpdateDate())
-                .build();
+                .updatedDate(comment.getUpdateDate());
+
+        Reply reply = comment.getReply();
+        if (reply != null) {
+            builder.reply(ReplyResponse.fromEntity(reply));
+        }
+
+        return builder.build();
     }
 
     public static CommentResponse fromEntity(Comment comment) {
-        return CommentResponse.builder()
+        CommentResponse.CommentResponseBuilder builder = CommentResponse.builder()
                 .commentId(comment.getCommentId())
                 .writerId(comment.getWriter().getMemberId())
                 .nickname(comment.getWriter().getNickname())
                 .profileImagePath(comment.getWriter().getProfileImagePath())
                 .content(comment.getContent())
-                .reply(ReplyResponse.fromEntity(comment.getReply()))
                 .registerDate(comment.getRegisterDate())
-                .updatedDate(comment.getUpdateDate())
-                .build();
-    }
+                .updatedDate(comment.getUpdateDate());
 
+        if (comment.getReply() != null) {
+            builder.reply(ReplyResponse.fromEntity(comment.getReply()));
+        } else {
+            builder.reply(null); // reply 필드가 null인 경우에는 null로 설정
+        }
+
+        return builder.build();
+    }
 }
 
