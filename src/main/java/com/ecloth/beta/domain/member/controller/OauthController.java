@@ -1,5 +1,6 @@
 package com.ecloth.beta.domain.member.controller;
 
+import com.ecloth.beta.domain.member.dto.MemberLoginResponse;
 import com.ecloth.beta.domain.member.dto.OauthToken;
 import com.ecloth.beta.domain.member.service.OauthService;
 import io.swagger.annotations.Api;
@@ -23,13 +24,13 @@ public class OauthController {
 
     @ApiOperation(value = "카카오 로그인", notes = "카카오계정을 통해 로그인을 진행한다.")
     @GetMapping("/KakaoLogin")
-    public ResponseEntity<Void> kakaoLogin(@ApiIgnore @RequestParam("code") String authCode) {
+    public ResponseEntity<Object> kakaoLogin(@ApiIgnore @RequestParam("code") String authCode) {
         log.info("카카오 authcode 받음 : " + authCode);
 
         OauthToken oauthToken = oAuthService.getKakaoToken(authCode);
-        HttpHeaders headers = oAuthService.kakaoRegisterAndGetToken(oauthToken.getAccess_token());
+        MemberLoginResponse response = oAuthService.kakaoRegisterAndGetToken(oauthToken.getAccess_token());
 
-        return ResponseEntity.ok().headers(headers).build();
+        return ResponseEntity.ok().headers(response.getHeaders()).body(response.getBody());
     }
 
 }
