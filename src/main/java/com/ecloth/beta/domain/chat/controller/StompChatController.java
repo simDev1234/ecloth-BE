@@ -9,6 +9,7 @@ import com.ecloth.beta.domain.chat.service.ChatRoomService;
 import com.ecloth.beta.domain.member.repository.MemberRepository;
 import io.swagger.annotations.Api;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RequestMapping("/chat")
 @Api(tags = "채팅 메세지 API")
+@Slf4j
 public class StompChatController {
 
     private final SimpMessagingTemplate simpMessagingTemplate;
@@ -27,6 +29,11 @@ public class StompChatController {
 
     @MessageMapping("/enter")
     public void chatRoomEnter(ChatMessageSendRequest request){
+
+        log.info("StompChatController.chatRoomEnter : " +
+                 "chatRoomId - {}, writerId - {}, message - {}",
+                  request.getChatRoomId(), request.getWriterId(), request.getMessage());
+
         validateIfWriterIsMemberOfChatRoom(request);
         extractEnterMessageFromMemberNickname(request);
         ChatMessageSendResponse response = chatMessageResponseAfterSavingToMongoDB(request);
@@ -40,6 +47,11 @@ public class StompChatController {
 
     @MessageMapping("/message")
     public void messageSend(ChatMessageSendRequest request){
+
+        log.info("StompChatController.chatRoomEnter : " +
+                        "chatRoomId - {}, writerId - {}, message - {}",
+                  request.getChatRoomId(), request.getWriterId(), request.getMessage());
+
         validateIfWriterIsMemberOfChatRoom(request);
         ChatMessageSendResponse response = chatMessageResponseAfterSavingToMongoDB(request);
         simpMessagingTemplate.convertAndSend(subscriptionURI(request), response);
