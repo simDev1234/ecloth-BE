@@ -1,8 +1,6 @@
 package com.ecloth.beta.domain.post.posting.service;
 
 import com.ecloth.beta.domain.member.entity.Member;
-import com.ecloth.beta.domain.member.exception.MemberErrorCode;
-import com.ecloth.beta.domain.member.exception.MemberException;
 import com.ecloth.beta.domain.member.repository.MemberRepository;
 import com.ecloth.beta.domain.post.posting.dto.*;
 import com.ecloth.beta.domain.post.posting.entity.Image;
@@ -14,6 +12,7 @@ import com.ecloth.beta.utill.S3FileUploader;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -23,6 +22,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@Component
 @RequiredArgsConstructor
 public class PostingService {
 
@@ -33,7 +33,8 @@ public class PostingService {
     private final S3FileUploader s3FileUploader;
 
 
-    public void createPost(PostingCreateRequest request) {
+
+    public void createPost(PostingCreateRequest request) throws Exception {
 
         // 회원 확인
         Member writer = memberRepository.findById(request.getMemberId())
@@ -49,6 +50,7 @@ public class PostingService {
         postingRepository.save(newPosting);
     }
 
+
     public MemberPostingListResponse getMemberPostList(Long memberId, MemberPostingListRequest request) {
 
         // 회원 확인
@@ -61,10 +63,12 @@ public class PostingService {
         return MemberPostingListResponse.fromEntity(postingPage);
     }
 
-    private List<Image> createImageAfterSavingToS3(MultipartFile[] images, Posting newPosting) {
+    public List<Image> createImageAfterSavingToS3(MultipartFile[] images, Posting newPosting) throws Exception {
         List<Image> imageList = new ArrayList<>();
+        S3FileUploader s3FileUploader = new S3FileUploader();
         for (int i = 0; i < images.length; i++) {
-            String imageUrlPath = s3FileUploader.uploadFileAndGetURL(images[i]);
+            byte[] imageData = images[i].getBytes(); // MultipartFile에서 바이트 배열 추출
+            String imageUrlPath = s3FileUploader.uploadImageToS3AndGetURL(images[i]);
             Image newImage = imageRepository.save(
                     Image.builder().posting(newPosting).url(imageUrlPath).isRepresentImage(i == 0).build()
             );
@@ -72,6 +76,9 @@ public class PostingService {
         }
         return imageList;
     }
+
+
+
 
     public PostingDetailResponse getPostDetail(Long postingId) {
 
@@ -95,7 +102,7 @@ public class PostingService {
         return PostingListResponse.fromEntity(postingPage);
     }
 
-    public void updatePost(Long postingId, PostingUpdateRequest request) {
+    public void updatePost(Long postingId, PostingUpdateRequest request) throws Exception {
 
         // 포스트 조회
         Posting posting = postingRepository.findByPostingIdFetchJoinedWithMember(postingId)
@@ -136,7 +143,8 @@ public class PostingService {
     }
 
 
-    public void deletePost(Long postingId, Long memberId) {
+    // 게시글 삭제
+    public void deletePost(Long postingId, Long memberId) throws Exception {
         // 게시글 조회
         Posting posting = postingRepository.findById(postingId)
                 .orElseThrow(() -> new EntityNotFoundException("Posting with id " + postingId + " not found"));
@@ -147,6 +155,11 @@ public class PostingService {
 
         // 해당 게시글에 연관된 Image 엔티티 삭제
         for (Image image : posting.getImageList()) {
+            // S3에서 객체 삭제
+            String s3Key = extractS3KeyFromUrl(image.getUrl());
+            s3FileUploader.deleteObjectFromS3(s3Key);
+
+            // 이미지 엔티티 삭제
             imageRepository.delete(image);
         }
 
@@ -154,8 +167,9 @@ public class PostingService {
         postingRepository.delete(posting);
     }
 
-
+    private String extractS3KeyFromUrl(String url) {
+        return url.substring(url.lastIndexOf("/") + 1);
+    }
 }
-
 
 

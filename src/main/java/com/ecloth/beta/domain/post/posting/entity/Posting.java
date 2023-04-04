@@ -35,8 +35,9 @@ public class Posting extends BaseEntity {
     @OneToMany(mappedBy = "posting")
     private List<Comment> commentList = new ArrayList<>();
 
-    private Long likeCount;
-    private Long viewCount;
+    private Long likeCount = 0L;
+    private Long viewCount = 0L;
+
 
     public void changeTitle(String title) {
         this.title = title;
@@ -51,14 +52,23 @@ public class Posting extends BaseEntity {
     }
 
     public void increaseViewCount() {
+        this.viewCount = 0L;
         this.viewCount++;
     }
 
     public void increaseLikeCount() {
+        this.likeCount = 0L;
         this.likeCount++;
     }
 
     public void decreaseLikeCount() {
+        this.likeCount = 0L;
         this.likeCount--;
     }
+
+
+    public void setImageList(List<Image> imageList) {
+        this.imageList = imageList;
+    }
+
 }

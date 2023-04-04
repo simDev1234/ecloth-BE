@@ -16,6 +16,7 @@ import org.springframework.web.server.ResponseStatusException;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.persistence.EntityNotFoundException;
+import java.io.IOException;
 
 /**
  * 포스트 API
@@ -36,7 +37,7 @@ public class PostingController {
     public ResponseEntity<Void> postCreate(@RequestParam("images") MultipartFile[] images,
                                            @ApiIgnore @AuthenticationPrincipal MemberDetails memberDetails,
                                            @RequestParam("title") String title,
-                                           @RequestParam("content") String content) {
+                                           @RequestParam("content") String content) throws Exception {
 
         PostingCreateRequest request = new PostingCreateRequest();
         request.setImages(images);
@@ -48,6 +49,7 @@ public class PostingController {
 
         return ResponseEntity.ok().build();
     }
+
 
     // 게시글 목록 조회 - 필터 : 조회수순, 좋아요순, 최신순
     @GetMapping("/feed/post")
@@ -81,7 +83,7 @@ public class PostingController {
     @PutMapping("/feed/post/{postingId}")
     public ResponseEntity<Void> postUpdate(@RequestBody PostingUpdateRequest request,
 
-                                           @PathVariable Long postingId) {
+                                           @PathVariable Long postingId) throws Exception {
 
         postingService.updatePost(postingId, request);
 
@@ -98,14 +100,6 @@ public class PostingController {
         return ResponseEntity.ok().build();
     }
 
-    // 포스트 삭제
-//    @DeleteMapping("/feed/post/{postingId}")
-//    public ResponseEntity<Void> postDelete(@ApiIgnore @AuthenticationPrincipal MemberDetails memberDetails
-//            ,@PathVariable Long postingId) {
-//        postingService.deletePost(memberDetails.getMemberId(),postingId);
-//
-//        return ResponseEntity.ok().build();
-//    }
 
     @DeleteMapping("/feed/post/{postingId}")
     public ResponseEntity<Void> postDelete(@ApiIgnore @AuthenticationPrincipal MemberDetails memberDetails, @PathVariable Long postingId) {
@@ -120,5 +114,4 @@ public class PostingController {
     }
 
 }
-
 
