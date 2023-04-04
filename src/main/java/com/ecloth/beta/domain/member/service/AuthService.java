@@ -107,7 +107,7 @@ public class AuthService {
         // redis에 RT: 아이디(key) / RefreshToken (value) 형태로 리프레시 토큰 저장
         redisTemplate.opsForValue().set("RT:" + member.getMemberId(), token.getRefreshToken(), token.getRefreshTokenExpirationTime(), TimeUnit.MILLISECONDS);
 
-        // AccessToken과 RefreshToken Http Header에 담아 반환
+        // AccessToken RefreshToken 쿠키 Http Header에 담아 반환
         HttpHeaders headers = new HttpHeaders();
         headers.add("authorization", "Bearer " + token.getAccessToken());
 
