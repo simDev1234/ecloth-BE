@@ -1,9 +1,8 @@
 package com.ecloth.beta.domain.chat.controller;
 
 import com.ecloth.beta.domain.chat.dto.ChatMessageSendRequest;
-import com.ecloth.beta.domain.chat.dto.ChatMessageSendResponse;
+import com.ecloth.beta.domain.chat.dto.ChatMessageListResponse;
 import com.ecloth.beta.domain.chat.exception.ChatException;
-import com.ecloth.beta.domain.chat.exception.ErrorCode;
 import com.ecloth.beta.domain.chat.service.ChatMessageService;
 import com.ecloth.beta.domain.chat.service.ChatRoomService;
 import com.ecloth.beta.domain.member.repository.MemberRepository;
@@ -36,7 +35,7 @@ public class StompChatMessageController {
 
         validateIfWriterIsMemberOfChatRoom(request);
         extractEnterMessageFromMemberNickname(request);
-        ChatMessageSendResponse response = chatMessageResponseAfterSavingToMongoDB(request);
+        ChatMessageListResponse response = saveAndGetMessageList(request);
         simpMessagingTemplate.convertAndSend(subscriptionURI(request), response);
 
         return ResponseEntity.ok().build();
@@ -47,6 +46,10 @@ public class StompChatMessageController {
         request.setMessage(String.format("%s님이 들어왔습니다.", nickname));
     }
 
+    private ChatMessageListResponse saveAndGetMessageList(ChatMessageSendRequest request) {
+        return chatMessageService.saveMessageAndGetMessageList(request);
+    }
+
     @MessageMapping("/chat/message")
     public ResponseEntity<?> messageSend(@RequestBody ChatMessageSendRequest request){
 
@@ -54,7 +57,7 @@ public class StompChatMessageController {
                   request.getChatRoomId(), request.getWriterId(), request.getMessage());
 
         validateIfWriterIsMemberOfChatRoom(request);
-        ChatMessageSendResponse response = chatMessageResponseAfterSavingToMongoDB(request);
+        ChatMessageListResponse response = saveAndGetMessageList(request);
         simpMessagingTemplate.convertAndSend(subscriptionURI(request), response);
 
         return ResponseEntity.ok().build();
@@ -70,10 +73,6 @@ public class StompChatMessageController {
 
     private String subscriptionURI(ChatMessageSendRequest request) {
         return String.format("/queue/chat/%d", request.getChatRoomId());
-    }
-
-    private ChatMessageSendResponse chatMessageResponseAfterSavingToMongoDB(ChatMessageSendRequest request) {
-        return chatMessageService.saveMessage(request);
     }
 
 }
