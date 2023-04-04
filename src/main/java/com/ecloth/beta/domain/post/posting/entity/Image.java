@@ -1,11 +1,13 @@
 package com.ecloth.beta.domain.post.posting.entity;
 
 import com.ecloth.beta.common.entity.BaseEntity;
+import com.ecloth.beta.utill.S3FileUploader;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.envers.AuditOverride;
+
 import javax.persistence.*;
 
 @Entity
@@ -14,7 +16,7 @@ import javax.persistence.*;
 @AllArgsConstructor
 @Builder
 @AuditOverride(forClass = BaseEntity.class)
-public class Image extends BaseEntity{
+public class Image extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,4 +37,7 @@ public class Image extends BaseEntity{
         }
     }
 
+    public String getImageUrl() {
+        return getImageUrl();
+    }
 }

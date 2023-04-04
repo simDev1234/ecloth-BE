@@ -3,6 +3,7 @@ package com.ecloth.beta.domain.post.posting.controller;
 import com.ecloth.beta.domain.post.posting.dto.MemberPostingListRequest;
 import com.ecloth.beta.domain.post.posting.dto.MemberPostingListResponse;
 import com.ecloth.beta.domain.post.posting.service.PostingService;
+import com.ecloth.beta.security.memberDetail.MemberDetails;
 import io.swagger.annotations.Api;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -14,11 +15,7 @@ import springfox.documentation.annotations.ApiIgnore;
 
 import java.security.Principal;
 
-/**
- * 개인 피드 API
- * - (협의 필요) 마이페이지 > 개인 피드
- * - 회원의 개인 피드
- */
+
 @RestController
 @RequestMapping("/api/member")
 @Api(tags = "개인 피드 API")
@@ -28,9 +25,9 @@ public class MemberPostingController {
     private final PostingService postingService;
 
     @GetMapping("/post")
-    public ResponseEntity<MemberPostingListResponse> memberPostList(@ApiIgnore @AuthenticationPrincipal Principal principal,
+    public ResponseEntity<MemberPostingListResponse> memberPostList(@ApiIgnore @AuthenticationPrincipal MemberDetails memberDetails,
                                                                     MemberPostingListRequest request) {
-        Long memberId = Long.valueOf(principal.getName());
+        Long memberId = memberDetails.getMemberId();
         MemberPostingListResponse response = postingService.getMemberPostList(memberId, request);
 
         return ResponseEntity.ok(response);
