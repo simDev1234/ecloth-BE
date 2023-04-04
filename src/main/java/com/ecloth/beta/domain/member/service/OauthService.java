@@ -1,5 +1,6 @@
 package com.ecloth.beta.domain.member.service;
 
+import com.ecloth.beta.domain.member.dto.MemberLoginResponse;
 import com.ecloth.beta.security.jwt.JwtTokenProvider;
 import com.ecloth.beta.domain.member.dto.KakaoProfileRequest;
 import com.ecloth.beta.domain.member.dto.OauthToken;
@@ -14,10 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
@@ -92,7 +90,7 @@ public class OauthService {
 
     // 로그인 & JWT 토큰발급
     @Transactional
-    public HttpHeaders kakaoRegisterAndGetToken(String token) {
+    public MemberLoginResponse kakaoRegisterAndGetToken(String token) {
         log.info("kakaoRegisterAndGetToken 들어옴");
         // 유저정보 받기
         KakaoProfileRequest userInfo = getUserInfo(token);
@@ -130,16 +128,25 @@ public class OauthService {
         oauthTokenMap.remove(token); //Redis에 저장 후 oauthTokenMap에 담긴 정보 삭제
         log.info("해시맵정보 레디스 저장후 삭제 확인 null : " + oauthTokenMap.get(token));
 
-        // JWT AccessToken과 RefreshToken Http Header에 담아 반환하기
+        // JWT AccessToken RefreshToken 쿠키 Http Header에 담아 반환하기
         HttpHeaders headers = new HttpHeaders();
         headers.add("authorization", "Bearer " + jwtDto.getAccessToken());
-        headers.add("refreshtoken", "Bearer " + jwtDto.getRefreshToken());
+
+        ResponseCookie refreshTokenCookie = ResponseCookie.from("refreshtoken", jwtDto.getRefreshToken())
+                .path("/api/token/reissue")
+                .httpOnly(true)
+//                .secure(true) //HTTPS
+                .sameSite("Strict")
+                .build();
+        headers.add("Set-Cookie", refreshTokenCookie.toString());
 
         log.info("jwt AT : " + jwtDto.getAccessToken());
         log.info("jwt RT : " + jwtDto.getRefreshToken());
         log.info("kakao Redis RT : " + oauthToken.getRefresh_token());
 
-        return headers;
+        String message = "로그인이 완료 되었습니다.";
+
+        return new MemberLoginResponse(headers, message);
     }
 
     // 유저 정보 가져오기
