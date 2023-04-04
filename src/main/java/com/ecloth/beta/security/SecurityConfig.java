@@ -48,7 +48,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             // api
             "/","/api/register","/api/register/email-auth/**","/api/login", "/api/register/email-auth",
             "/KakaoLogin","/KakaoLogin/**","/api/member/{param}/follows","/api/member/resetPassword",
-            "/api/member/resetPassword/update", "/api/member/{memberId}/follow/**","/api/temperature/images"
+            "/api/member/resetPassword/update", "/api/member/{memberId}/follow/**","/api/temperature/images",
+            "/ws-connection", "/app/**"
     };
 
     public static final String[] PERMIT_GET_URL_ARRAY = {
@@ -90,7 +91,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     public void configure(WebSecurity web) {
         web.ignoring()
                 .antMatchers("/h2-console/**", "/swagger-ui.html/**","/swagger-ui.html/#/**", "/v2/api-docs")
-                .antMatchers("/css/**", "/vendor/**", "/js/**", "/images/**");
+                .antMatchers("/css/**", "/vendor/**", "/js/**", "/images/**")
+                .antMatchers("/ws-connection", "/app/**");
         web.ignoring()
                 .mvcMatchers("/swagger-ui/*", "/swagger-resources/**", "/swagger-ui.html");
         web.ignoring().antMatchers("*");
