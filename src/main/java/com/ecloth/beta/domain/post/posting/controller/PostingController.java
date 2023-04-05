@@ -49,7 +49,7 @@ public class PostingController {
 
     // 게시글 목록 조회 - 필터 : 조회수순, 좋아요순, 최신순
     @GetMapping("/feed/post")
-    public ResponseEntity<PostingListResponse> getLatestPostingList(PostingListRequest request) {
+    public ResponseEntity<PostingListResponse> postListByPage(PostingListRequest request) {
 
         PostingListResponse response = postingService.getPostListByPage(request);
 

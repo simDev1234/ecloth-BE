@@ -5,6 +5,8 @@ import com.ecloth.beta.domain.member.repository.MemberRepository;
 import com.ecloth.beta.domain.post.posting.dto.*;
 import com.ecloth.beta.domain.post.posting.entity.Image;
 import com.ecloth.beta.domain.post.posting.entity.Posting;
+import com.ecloth.beta.domain.post.posting.exception.ErrorCode;
+import com.ecloth.beta.domain.post.posting.exception.PostingException;
 import com.ecloth.beta.domain.post.posting.repository.ImageRepository;
 import com.ecloth.beta.domain.post.posting.repository.PostingRepository;
 import com.ecloth.beta.utill.RedisClient;
@@ -79,7 +81,7 @@ public class PostingService {
 
         // 포스트 조회
         Posting posting = postingRepository.findByPostingIdFetchJoinedWithMemberAndImage(postingId)
-                .orElseThrow(() -> new RuntimeException("Posting Not Found"));
+                .orElseThrow(() -> new PostingException(ErrorCode.POSTING_NOT_FOUND));
 
         // 조회수 + 1
         posting.increaseViewCount();
@@ -92,7 +94,7 @@ public class PostingService {
     public PostingListResponse getPostListByPage(PostingListRequest request) {
 
         // 포스트 목록 조회
-        Page<Posting> postingPage = postingRepository.findPostingByPaging(request.toCustomPage().toPageable());
+        Page<Posting> postingPage = postingRepository.findPostingByPaging(request.toPageable());
 
         return PostingListResponse.fromEntity(postingPage);
     }
@@ -101,7 +103,7 @@ public class PostingService {
 
         // 포스트 조회
         Posting posting = postingRepository.findByPostingIdFetchJoinedWithMember(postingId)
-                .orElseThrow(() -> new RuntimeException("Posting Not Found"));
+                .orElseThrow(() -> new PostingException(ErrorCode.POSTING_NOT_FOUND));
 
         // 포스트 제목, 본문 수정
         posting.changeTitle(request.getTitle());
@@ -117,7 +119,7 @@ public class PostingService {
 
         // 포스트 조회
         Posting posting = postingRepository.findById(postingId)
-                .orElseThrow(() -> new RuntimeException("Posting Not Found"));
+                .orElseThrow(() -> new PostingException(ErrorCode.POSTING_NOT_FOUND));
 
         // 레디스에서 좋아요 기록 조회
         String redisLikeKey = redisLikeKey(postingId, memberId);
@@ -137,15 +139,14 @@ public class PostingService {
         return String.format("like:%d-%d", postingId,memberId);
     }
 
-
     // 게시글 삭제
     public void deletePost(Long postingId, Long memberId) throws Exception {
         // 게시글 조회
         Posting posting = postingRepository.findById(postingId)
-                .orElseThrow(() -> new EntityNotFoundException("Posting with id " + postingId + " not found"));
+                .orElseThrow(() -> new PostingException(ErrorCode.POSTING_NOT_FOUND));
 
         if (!posting.getWriter().getMemberId().equals(memberId)) {
-            throw new RuntimeException("Only writer can delete the posting.");
+            throw new PostingException(ErrorCode.POSTING_WRITER_NOT_MATCHING);
         }
 
         // 해당 게시글에 연관된 Image 엔티티 삭제

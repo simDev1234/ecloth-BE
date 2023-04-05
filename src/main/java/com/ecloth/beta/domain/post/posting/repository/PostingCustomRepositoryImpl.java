@@ -10,10 +10,7 @@ import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Repository;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +33,7 @@ public class PostingCustomRepositoryImpl implements PostingCustomRepository{
                 .selectFrom(posting)
                 .join(posting.writer, member)
                 .fetchJoin()
-                .join(posting.imageList, image)
+                .leftJoin(posting.imageList, image)
                 .fetchJoin()
                 .fetchOne();
 
@@ -51,7 +48,7 @@ public class PostingCustomRepositoryImpl implements PostingCustomRepository{
 
         List<Posting> postingList = jpaQueryFactory
                 .selectFrom(posting)
-                .join(posting.imageList, image)
+                .leftJoin(posting.imageList, image)
                 .fetchJoin()
                 .orderBy(getOrderSpecifier(pageable.getSort()).stream().toArray(OrderSpecifier[]::new))
                 .offset(pageable.getPageNumber() - 1)

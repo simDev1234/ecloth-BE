@@ -60,9 +60,9 @@ public class FollowController {
         FollowListResponse response;
 
         if (FOLLOWS.equals(dir)) {
-            response = followService.findFollowMemberList(memberId, request.toCustomPage());
+            response = followService.findFollowMemberList(memberId, request);
         } else {
-            response = followService.findFollowerMemberList(memberId, request.toCustomPage());
+            response = followService.findFollowerMemberList(memberId, request);
         }
 
         return ResponseEntity.ok(response);
