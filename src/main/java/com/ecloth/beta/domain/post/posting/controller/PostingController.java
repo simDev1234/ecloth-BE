@@ -3,6 +3,8 @@ package com.ecloth.beta.domain.post.posting.controller;
 import com.ecloth.beta.domain.post.posting.dto.*;
 import com.ecloth.beta.domain.post.posting.service.PostingService;
 import com.ecloth.beta.security.memberDetail.MemberDetails;
+import com.querydsl.core.util.ArrayUtils;
+import io.jsonwebtoken.lang.Objects;
 import io.swagger.annotations.Api;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -30,11 +32,15 @@ public class PostingController {
 
     // 포스트 등록
     @PostMapping(value = "/feed/post", consumes = {"multipart/form-data"})
-    public ResponseEntity<Void> postCreate(@ApiIgnore @AuthenticationPrincipal MemberDetails memberDetails,
-                                           @RequestParam(value = "file", required = false) MultipartFile[] images,
-                                           PostingCreateRequest request) throws Exception {
+    public ResponseEntity<?> postCreate(@ApiIgnore @AuthenticationPrincipal MemberDetails memberDetails,
+                                        @RequestParam(value = "file", required = false) MultipartFile[] images,
+                                        PostingCreateRequest request) throws Exception {
 
         request.setMemberId(memberDetails.getMemberId());
+
+        if (ArrayUtils.isEmpty(request.getImages())) {
+            return new ResponseEntity<>("이미지를 1개 이상 등록해주세요.", HttpStatus.BAD_REQUEST);
+        }
 
         postingService.createPost(images, request);
 
@@ -90,7 +96,7 @@ public class PostingController {
         return ResponseEntity.ok().build();
     }
 
-
+    // 포스트 삭제
     @DeleteMapping("/feed/post/{postingId}")
     public ResponseEntity<Void> postDelete(@ApiIgnore @AuthenticationPrincipal MemberDetails memberDetails,
                                            @PathVariable Long postingId) {

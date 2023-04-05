@@ -40,6 +40,24 @@ spring.servlet.multipart.maxRequestSize=10MB
 ```
 - 원인 : MultipartFile[] 타입인 images 변수값을 null 값으로 받을 때 bindException이 나타남 
 - 해결 : 컨트롤러에 @RequestParam(value = "file", required = false) 로 images를 따로 뽑아 해결 
+- 해결 후 변동 : 포스트 등록 시 이미지를 1개 이상 저장하는 것으로 로직이 수정되어 위 코드에서 아래 예외 사항을 추가
+```java
+@PostMapping(value = "/feed/post", consumes = {"multipart/form-data"})
+public ResponseEntity<?> postCreate(@ApiIgnore @AuthenticationPrincipal MemberDetails memberDetails,
+                                    @RequestParam(value = "file", required = false) MultipartFile[] images,
+                                    PostingCreateRequest request) throws Exception {
+
+    request.setMemberId(memberDetails.getMemberId());
+
+    if (ArrayUtils.isEmpty(request.getImages())) {
+        return new ResponseEntity<>("이미지를 1개 이상 등록해주세요.", HttpStatus.BAD_REQUEST);
+    }
+
+    postingService.createPost(images, request);
+
+    return ResponseEntity.ok().build();
+}
+```
 
 <br>
 
