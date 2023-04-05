@@ -114,7 +114,7 @@ public class ChatRoomService {
     @Transactional
     public void exitFromChatRoom(ChatRoomExitRequest request) {
 
-        ChatRoom chatRoom = chatRoomRepository.findById(request.getChatMemberId())
+        ChatRoom chatRoom = chatRoomRepository.findById(request.getChatRoomId())
                 .orElseThrow(() -> new ChatException(ErrorCode.CHAT_ROOM_NOT_FOUND));
 
         Member member = memberRepository.findById(request.getMemberId())
