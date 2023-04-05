@@ -4,7 +4,6 @@ import com.ecloth.beta.domain.post.posting.dto.*;
 import com.ecloth.beta.domain.post.posting.service.PostingService;
 import com.ecloth.beta.security.memberDetail.MemberDetails;
 import com.querydsl.core.util.ArrayUtils;
-import io.jsonwebtoken.lang.Objects;
 import io.swagger.annotations.Api;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -89,9 +88,9 @@ public class PostingController {
     // 포스트 좋아요 on/off
     @PutMapping("/feed/post/{postingId}/like")
     public ResponseEntity<Void> postLike(@PathVariable Long postingId,
-                                         @RequestBody PostingLikeRequest request) {
+                                         @ApiIgnore @AuthenticationPrincipal MemberDetails memberDetails) {
 
-        postingService.checkOrUnCheckLike(postingId, request.getMemberId());
+        postingService.checkOrUnCheckLike(postingId, memberDetails.getMemberId());
 
         return ResponseEntity.ok().build();
     }
