@@ -16,6 +16,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.EntityNotFoundException;
@@ -64,17 +65,20 @@ public class PostingService {
     }
 
     public List<Image> createImageAfterSavingToS3(MultipartFile[] images, Posting newPosting) throws Exception {
+
         List<Image> imageList = new ArrayList<>();
-        S3FileUploader s3FileUploader = new S3FileUploader();
+
         for (int i = 0; i < images.length; i++) {
-            byte[] imageData = images[i].getBytes(); // MultipartFile에서 바이트 배열 추출
             String imageUrlPath = s3FileUploader.uploadImageToS3AndGetURL(images[i]);
-            Image newImage = imageRepository.save(
-                    Image.builder().posting(newPosting).url(imageUrlPath).isRepresentImage(i == 0).build()
-            );
-            imageList.add(newImage);
+            if (StringUtils.hasText(imageUrlPath)) {
+                Image newImage = imageRepository.save(
+                        Image.builder().posting(newPosting).url(imageUrlPath).isRepresentImage(i == 0).build()
+                );
+                imageList.add(newImage);
+            }
         }
         return imageList;
+
     }
 
     public PostingDetailResponse getPostDetail(Long postingId) {
@@ -141,6 +145,7 @@ public class PostingService {
 
     // 게시글 삭제
     public void deletePost(Long postingId, Long memberId) throws Exception {
+
         // 게시글 조회
         Posting posting = postingRepository.findById(postingId)
                 .orElseThrow(() -> new PostingException(ErrorCode.POSTING_NOT_FOUND));
@@ -151,20 +156,12 @@ public class PostingService {
 
         // 해당 게시글에 연관된 Image 엔티티 삭제
         for (Image image : posting.getImageList()) {
-            // S3에서 객체 삭제
-            String s3Key = extractS3KeyFromUrl(image.getUrl());
-            s3FileUploader.deleteObjectFromS3(s3Key);
-
             // 이미지 엔티티 삭제
             imageRepository.delete(image);
         }
 
         // 게시글 삭제
         postingRepository.delete(posting);
-    }
-
-    private String extractS3KeyFromUrl(String url) {
-        return url.substring(url.lastIndexOf("/") + 1);
     }
 }
 

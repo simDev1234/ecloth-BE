@@ -1,6 +1,5 @@
 package com.ecloth.beta.domain.post.posting.repository;
 
-import com.ecloth.beta.domain.follow.entity.Follow;
 import com.ecloth.beta.domain.member.entity.QMember;
 import com.ecloth.beta.domain.post.posting.entity.Posting;
 import com.ecloth.beta.domain.post.posting.entity.QImage;

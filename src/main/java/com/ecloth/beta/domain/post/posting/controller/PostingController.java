@@ -30,16 +30,10 @@ public class PostingController {
 
     // 포스트 등록
     @PostMapping(value = "/feed/post", consumes = {"multipart/form-data"})
-    public ResponseEntity<Void> postCreate(@RequestParam("images") MultipartFile[] images,
-                                           @ApiIgnore @AuthenticationPrincipal MemberDetails memberDetails,
-                                           @RequestParam("title") String title,
-                                           @RequestParam("content") String content) throws Exception {
+    public ResponseEntity<Void> postCreate(@ApiIgnore @AuthenticationPrincipal MemberDetails memberDetails,
+                                           PostingCreateRequest request) throws Exception {
 
-        PostingCreateRequest request = new PostingCreateRequest();
-        request.setImages(images);
         request.setMemberId(memberDetails.getMemberId());
-        request.setTitle(title);
-        request.setContent(content);
 
         postingService.createPost(request);
 
