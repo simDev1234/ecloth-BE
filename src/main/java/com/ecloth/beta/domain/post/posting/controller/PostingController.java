@@ -1,8 +1,6 @@
 package com.ecloth.beta.domain.post.posting.controller;
 
-import com.ecloth.beta.domain.post.posting.dto.PostingLikeRequest;
 import com.ecloth.beta.domain.post.posting.dto.*;
-import com.ecloth.beta.domain.post.posting.repository.PostingRepository;
 import com.ecloth.beta.domain.post.posting.service.PostingService;
 import com.ecloth.beta.security.memberDetail.MemberDetails;
 import io.swagger.annotations.Api;
@@ -16,7 +14,6 @@ import org.springframework.web.server.ResponseStatusException;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.persistence.EntityNotFoundException;
-import java.io.IOException;
 
 /**
  * 포스트 API
@@ -30,10 +27,9 @@ import java.io.IOException;
 public class PostingController {
 
     private final PostingService postingService;
-    private final PostingRepository postingRepository;
 
     // 포스트 등록
-    @PostMapping(value = "/feed/post",consumes = {"multipart/form-data"})
+    @PostMapping(value = "/feed/post", consumes = {"multipart/form-data"})
     public ResponseEntity<Void> postCreate(@RequestParam("images") MultipartFile[] images,
                                            @ApiIgnore @AuthenticationPrincipal MemberDetails memberDetails,
                                            @RequestParam("title") String title,
@@ -102,7 +98,8 @@ public class PostingController {
 
 
     @DeleteMapping("/feed/post/{postingId}")
-    public ResponseEntity<Void> postDelete(@ApiIgnore @AuthenticationPrincipal MemberDetails memberDetails, @PathVariable Long postingId) {
+    public ResponseEntity<Void> postDelete(@ApiIgnore @AuthenticationPrincipal MemberDetails memberDetails,
+                                           @PathVariable Long postingId) {
         try {
             postingService.deletePost(postingId, memberDetails.getMemberId());
             return ResponseEntity.ok().build();

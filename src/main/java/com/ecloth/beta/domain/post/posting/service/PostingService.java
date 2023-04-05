@@ -32,8 +32,6 @@ public class PostingService {
     private final RedisClient redisClient;
     private final S3FileUploader s3FileUploader;
 
-
-
     public void createPost(PostingCreateRequest request) throws Exception {
 
         // 회원 확인
@@ -76,9 +74,6 @@ public class PostingService {
         }
         return imageList;
     }
-
-
-
 
     public PostingDetailResponse getPostDetail(Long postingId) {
 
