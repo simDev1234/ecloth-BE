@@ -35,6 +35,7 @@ public class PostingCustomRepositoryImpl implements PostingCustomRepository{
                 .fetchJoin()
                 .leftJoin(posting.imageList, image)
                 .fetchJoin()
+                .where(posting.postingId.eq(postingId))
                 .fetchOne();
 
         return Optional.ofNullable(foundPosting);
