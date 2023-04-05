@@ -120,23 +120,27 @@ public class PostingService {
 
     }
 
-    public void checkOrUnCheckLike(Long postingId, Long memberId) {
-
-        // 포스트 조회
-        Posting posting = postingRepository.findById(postingId)
-                .orElseThrow(() -> new PostingException(ErrorCode.POSTING_NOT_FOUND));
+    public boolean isLikeTurnedOn(Long postingId, Long memberId) {
 
         // 레디스에서 좋아요 기록 조회
         String redisLikeKey = redisLikeKey(postingId, memberId);
-        Optional<Boolean> optionalLikeHistory = redisClient.get(redisLikeKey, Boolean.class);
 
-        // 레디스에 있으면 like count -1, 없으면 + 1
-        if (optionalLikeHistory.isPresent()) {
-            redisClient.delete(redisLikeKey);
+        return redisClient.get(redisLikeKey, Boolean.class).isPresent();
+    }
+
+    public boolean checkOrUnCheckLike(Long postingId, Long memberId) {
+
+        Posting posting = postingRepository.findById(postingId)
+                .orElseThrow(() -> new PostingException(ErrorCode.POSTING_NOT_FOUND));
+
+        if (isLikeTurnedOn(postingId, memberId)) {
+            redisClient.delete(redisLikeKey(postingId, memberId));
             posting.decreaseLikeCount();
+            return false;
         } else {
-            redisClient.put(redisLikeKey, true);
+            redisClient.put(redisLikeKey(postingId, memberId), true);
             posting.increaseLikeCount();
+            return true;
         }
     }
 
@@ -164,6 +168,8 @@ public class PostingService {
         // 게시글 삭제
         postingRepository.delete(posting);
     }
+
+
 }
 
 

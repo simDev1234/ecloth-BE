@@ -85,14 +85,24 @@ public class PostingController {
         return ResponseEntity.ok().build();
     }
 
+    // 포스트 조회
+    @GetMapping("/feed/post/{postingId}/like")
+    public ResponseEntity<Boolean> postLikeStatus(@PathVariable Long postingId,
+                                                  @ApiIgnore @AuthenticationPrincipal MemberDetails memberDetails){
+
+        Boolean response = postingService.isLikeTurnedOn(postingId, memberDetails.getMemberId());
+
+        return ResponseEntity.ok(response);
+    }
+
     // 포스트 좋아요 on/off
     @PutMapping("/feed/post/{postingId}/like")
-    public ResponseEntity<Void> postLike(@PathVariable Long postingId,
-                                         @ApiIgnore @AuthenticationPrincipal MemberDetails memberDetails) {
+    public ResponseEntity<Boolean> postLikeOnOrOff(@PathVariable Long postingId,
+                                                   @ApiIgnore @AuthenticationPrincipal MemberDetails memberDetails) {
 
-        postingService.checkOrUnCheckLike(postingId, memberDetails.getMemberId());
+        Boolean response = postingService.checkOrUnCheckLike(postingId, memberDetails.getMemberId());
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(response);
     }
 
     // 포스트 삭제
