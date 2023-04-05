@@ -15,7 +15,7 @@ public class PostingCreateRequest {
     private Long memberId;
     private String title;
     private String content;
-    // private MultipartFile[] imageFiles;
+    private MultipartFile[] images;
 
     public Posting toPosting(Member writer){
         return Posting.builder()
