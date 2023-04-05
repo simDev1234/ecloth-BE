@@ -6,6 +6,24 @@ class com.ecloth.beta.member.entity.member cannot be cast to class java.io.seria
 - 원인 : 회원 엔터티의 크기가 너무 커져서 Json으로 직렬화가 안 되고 있다.
 - 해결 : Serializable을 implements하고, private final static long serialVersionUID = 1L 을 붙여줬다.
 
+## ISSUE 2. 406 에러 Not Acceptable 반환
+```java
+@AllArgsConstructor
+public class ChatRoomCreateResponse implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
+    private Long chatRoomId;
+
+    public static ChatRoomCreateResponse fromEntity(ChatRoom newChatRoom) {
+        return new ChatRoomCreateResponse(newChatRoom.getChatRoomId());
+    }
+}
+```
+- 원인 : 컨트롤러의 ResponseEntity에 담기는 DTO에 Getter가 없어, Jackson 라이브러리가 Json으로 직렬화를 하지 못함
+- 해결 : @Getter를 붙이고, Snake 방식으로 반환하기 위해 @JsonNaming Annotaion을 붙여주었다.
+
+
 # 2. 쿼리 분석
 ```
 - 목적 : 팔로우 목록 조회 속도 최적화 
