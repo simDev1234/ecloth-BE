@@ -1,9 +1,6 @@
 package com.ecloth.beta.domain.chat.controller;
 
-import com.ecloth.beta.domain.chat.dto.ChatRoomCreateRequest;
-import com.ecloth.beta.domain.chat.dto.ChatRoomCreateResponse;
-import com.ecloth.beta.domain.chat.dto.ChatRoomExitRequest;
-import com.ecloth.beta.domain.chat.dto.ChatRoomListResponse;
+import com.ecloth.beta.domain.chat.dto.*;
 import com.ecloth.beta.domain.chat.service.ChatRoomService;
 import com.ecloth.beta.common.page.CustomPage;
 import io.swagger.annotations.Api;
@@ -34,9 +31,9 @@ public class ChatRoomController {
     }
 
     @GetMapping("/{memberId}")
-    public ResponseEntity<ChatRoomListResponse> chatRoomList(@PathVariable Long memberId, CustomPage requestPage){
+    public ResponseEntity<ChatRoomListResponse> chatRoomList(@PathVariable Long memberId, ChatRoomListRequest request){
 
-        ChatRoomListResponse response = chatRoomService.findChatList(memberId, requestPage);
+        ChatRoomListResponse response = chatRoomService.findChatList(memberId, request);
 
         return ResponseEntity.ok(response);
     }

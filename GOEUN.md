@@ -6,6 +6,61 @@ class com.ecloth.beta.member.entity.member cannot be cast to class java.io.seria
 - 원인 : 회원 엔터티의 크기가 너무 커져서 Json으로 직렬화가 안 되고 있다.
 - 해결 : Serializable을 implements하고, private final static long serialVersionUID = 1L 을 붙여줬다.
 
+## ISSUE 2. 406 에러 Not Acceptable 반환
+```java
+@AllArgsConstructor
+public class ChatRoomCreateResponse implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
+    private Long chatRoomId;
+
+    public static ChatRoomCreateResponse fromEntity(ChatRoom newChatRoom) {
+        return new ChatRoomCreateResponse(newChatRoom.getChatRoomId());
+    }
+}
+```
+- 원인 : 컨트롤러의 ResponseEntity에 담기는 DTO에 Getter가 없어, Jackson 라이브러리가 Json으로 직렬화를 하지 못함
+- 해결 : @Getter를 붙이고, Snake 방식으로 반환하기 위해 @JsonNaming Annotaion을 붙여주었다.
+
+## ISSUE 3. MultipartFile Minimum Size Error
+```java
+org.apache.tomcat.util.http.fileupload.impl.FileSizeLimitExceededException: The field images exceeds its maximum permitted size of 1048576 bytes.
+```
+- 원인 : 디폴트 값인 1048576 bytes (약 1MB) 을 넘어서는 image를 전달했기 때문
+- 해결 : 아래와 같이 설정값을 추가했다.
+```java
+spring.servlet.multipart.maxFileSize=10MB
+spring.servlet.multipart.maxRequestSize=10MB
+```
+
+## ISSUE 4. MultipartFile Minimum Size Error
+```java
+'java.lang.String' to required type 'org.springframework.web.multipart.MultipartFile' for property 'images[0]': no matching editors or conversion strategy found]]
+```
+- 원인 : MultipartFile[] 타입인 images 변수값을 null 값으로 받을 때 bindException이 나타남 
+- 해결 : 컨트롤러에 @RequestParam(value = "file", required = false) 로 images를 따로 뽑아 해결 
+- 해결 후 변동 : 포스트 등록 시 이미지를 1개 이상 저장하는 것으로 로직이 수정되어 위 코드에서 아래 예외 사항을 추가
+```java
+@PostMapping(value = "/feed/post", consumes = {"multipart/form-data"})
+public ResponseEntity<?> postCreate(@ApiIgnore @AuthenticationPrincipal MemberDetails memberDetails,
+                                    @RequestParam(value = "file", required = false) MultipartFile[] images,
+                                    PostingCreateRequest request) throws Exception {
+
+    request.setMemberId(memberDetails.getMemberId());
+
+    if (ArrayUtils.isEmpty(request.getImages())) {
+        return new ResponseEntity<>("이미지를 1개 이상 등록해주세요.", HttpStatus.BAD_REQUEST);
+    }
+
+    postingService.createPost(images, request);
+
+    return ResponseEntity.ok().build();
+}
+```
+
+<br>
+
 # 2. 쿼리 분석
 ```
 - 목적 : 팔로우 목록 조회 속도 최적화 

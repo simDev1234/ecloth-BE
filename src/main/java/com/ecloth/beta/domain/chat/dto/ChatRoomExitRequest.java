@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 public class ChatRoomExitRequest {
 
-    private Long chatMemberId;
+    private Long chatRoomId;
     private Long memberId;
 
 }

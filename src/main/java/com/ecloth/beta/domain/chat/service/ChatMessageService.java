@@ -2,11 +2,12 @@ package com.ecloth.beta.domain.chat.service;
 
 import com.ecloth.beta.domain.chat.document.ChatMessage;
 import com.ecloth.beta.domain.chat.dto.ChatMessageSendRequest;
-import com.ecloth.beta.domain.chat.dto.ChatMessageSendResponse;
+import com.ecloth.beta.domain.chat.dto.ChatMessageListResponse;
 import com.ecloth.beta.domain.chat.repository.ChatMessageRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -19,9 +20,13 @@ public class ChatMessageService {
         return chatMessageRepository.findDistinctFirstByChatRoomIdOrderByRegisterDate(chatRoomId);
     }
 
-    public ChatMessageSendResponse saveMessage(ChatMessageSendRequest request) {
-        ChatMessage chatMessage = chatMessageRepository.save(request.toEntity());
-        return ChatMessageSendResponse.fromEntity(chatMessage);
+    public ChatMessageListResponse saveMessageAndGetMessageList(ChatMessageSendRequest request) {
+
+        chatMessageRepository.save(request.toEntity());
+
+        List<ChatMessage> chatMessages = chatMessageRepository.findAllByChatRoomIdOrderByRegisterDate(request.getChatRoomId());
+
+        return ChatMessageListResponse.fromEntity(chatMessages);
     }
 
 }

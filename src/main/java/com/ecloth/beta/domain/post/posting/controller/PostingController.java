@@ -1,10 +1,9 @@
 package com.ecloth.beta.domain.post.posting.controller;
 
-import com.ecloth.beta.domain.post.posting.dto.PostingLikeRequest;
 import com.ecloth.beta.domain.post.posting.dto.*;
-import com.ecloth.beta.domain.post.posting.repository.PostingRepository;
 import com.ecloth.beta.domain.post.posting.service.PostingService;
 import com.ecloth.beta.security.memberDetail.MemberDetails;
+import com.querydsl.core.util.ArrayUtils;
 import io.swagger.annotations.Api;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -29,29 +28,27 @@ import javax.persistence.EntityNotFoundException;
 public class PostingController {
 
     private final PostingService postingService;
-    private final PostingRepository postingRepository;
 
     // 포스트 등록
-    @PostMapping(value = "/feed/post",consumes = {"multipart/form-data"})
-    public ResponseEntity<Void> postCreate(@RequestParam("images") MultipartFile[] images,
-                                           @ApiIgnore @AuthenticationPrincipal MemberDetails memberDetails,
-                                           @RequestParam("title") String title,
-                                           @RequestParam("content") String content) {
+    @PostMapping(value = "/feed/post", consumes = {"multipart/form-data"})
+    public ResponseEntity<?> postCreate(@ApiIgnore @AuthenticationPrincipal MemberDetails memberDetails,
+                                        @RequestParam(value = "file", required = false) MultipartFile[] images,
+                                        PostingCreateRequest request) throws Exception {
 
-        PostingCreateRequest request = new PostingCreateRequest();
-        request.setImages(images);
         request.setMemberId(memberDetails.getMemberId());
-        request.setTitle(title);
-        request.setContent(content);
 
-        postingService.createPost(request);
+        if (ArrayUtils.isEmpty(request.getImages())) {
+            return new ResponseEntity<>("이미지를 1개 이상 등록해주세요.", HttpStatus.BAD_REQUEST);
+        }
+
+        postingService.createPost(images, request);
 
         return ResponseEntity.ok().build();
     }
 
     // 게시글 목록 조회 - 필터 : 조회수순, 좋아요순, 최신순
     @GetMapping("/feed/post")
-    public ResponseEntity<PostingListResponse> getLatestPostingList(PostingListRequest request) {
+    public ResponseEntity<PostingListResponse> postListByPage(PostingListRequest request) {
 
         PostingListResponse response = postingService.getPostListByPage(request);
 
@@ -80,35 +77,38 @@ public class PostingController {
     // 포스트 수정
     @PutMapping("/feed/post/{postingId}")
     public ResponseEntity<Void> postUpdate(@RequestBody PostingUpdateRequest request,
+                                           @RequestParam(value = "file", required = false) MultipartFile[] images,
+                                           @PathVariable Long postingId) throws Exception {
 
-                                           @PathVariable Long postingId) {
-
-        postingService.updatePost(postingId, request);
+        postingService.updatePost(postingId, images, request);
 
         return ResponseEntity.ok().build();
+    }
+
+    // 포스트 조회
+    @GetMapping("/feed/post/{postingId}/like")
+    public ResponseEntity<Boolean> postLikeStatus(@PathVariable Long postingId,
+                                                  @ApiIgnore @AuthenticationPrincipal MemberDetails memberDetails){
+
+        Boolean response = postingService.isLikeTurnedOn(postingId, memberDetails.getMemberId());
+
+        return ResponseEntity.ok(response);
     }
 
     // 포스트 좋아요 on/off
     @PutMapping("/feed/post/{postingId}/like")
-    public ResponseEntity<Void> postLike(@PathVariable Long postingId,
-                                         @RequestBody PostingLikeRequest request) {
+    public ResponseEntity<Boolean> postLikeOnOrOff(@PathVariable Long postingId,
+                                                   @ApiIgnore @AuthenticationPrincipal MemberDetails memberDetails) {
 
-        postingService.checkOrUnCheckLike(postingId, request.getMemberId());
+        Boolean response = postingService.checkOrUnCheckLike(postingId, memberDetails.getMemberId());
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(response);
     }
 
     // 포스트 삭제
-//    @DeleteMapping("/feed/post/{postingId}")
-//    public ResponseEntity<Void> postDelete(@ApiIgnore @AuthenticationPrincipal MemberDetails memberDetails
-//            ,@PathVariable Long postingId) {
-//        postingService.deletePost(memberDetails.getMemberId(),postingId);
-//
-//        return ResponseEntity.ok().build();
-//    }
-
     @DeleteMapping("/feed/post/{postingId}")
-    public ResponseEntity<Void> postDelete(@ApiIgnore @AuthenticationPrincipal MemberDetails memberDetails, @PathVariable Long postingId) {
+    public ResponseEntity<Void> postDelete(@ApiIgnore @AuthenticationPrincipal MemberDetails memberDetails,
+                                           @PathVariable Long postingId) {
         try {
             postingService.deletePost(postingId, memberDetails.getMemberId());
             return ResponseEntity.ok().build();
@@ -120,5 +120,4 @@ public class PostingController {
     }
 
 }
-
 

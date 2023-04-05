@@ -15,31 +15,4 @@ public class FollowListRequest extends CustomPage{
     @NotBlank
     private String dir;
 
-    FollowListRequest(){
-        super(1, 5, "registerDate", "DESC");
-    }
-
-    FollowListRequest(String dir){
-        this.dir = dir;
-    }
-
-    FollowListRequest(String dir, int page){
-        super(page, 5, "registerDate", "DESC");
-        this.dir = dir;
-    }
-
-    FollowListRequest(String dir, int page, int size){
-        super(page, size, "registerDate", "DESC");
-        this.dir = dir;
-    }
-
-    FollowListRequest(String dir, int page, int size, String sortBy){
-        super(page, size, sortBy, "DESC");
-        this.dir = dir;
-    }
-
-    public CustomPage toCustomPage(){
-        return new CustomPage(this.getPage(), this.getSize(), this.getSortBy(), this.getSortOrder());
-    }
-
 }

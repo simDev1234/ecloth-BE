@@ -22,6 +22,8 @@ public class PostingCreateRequest {
                 .writer(writer)
                 .title(this.title)
                 .content(this.content)
+                .likeCount(0L)
+                .viewCount(0L)
                 .build();
     }
 

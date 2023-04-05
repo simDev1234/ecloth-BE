@@ -14,6 +14,7 @@ import com.ecloth.beta.common.page.CustomPage;
 import com.ecloth.beta.domain.member.entity.Member;
 import com.ecloth.beta.domain.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -24,12 +25,14 @@ import org.springframework.util.StringUtils;
 
 import javax.transaction.Transactional;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 채팅(룸) 서비스
  */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ChatRoomService {
 
     private final MemberRepository memberRepository;
@@ -44,9 +47,23 @@ public class ChatRoomService {
                 .orElseThrow(() -> new UsernameNotFoundException("Member Not Found"))
         ));
 
+        validateIfChatRoomAlreadyExist(chatRoomMembers);
+
         ChatRoom newChatRoom = chatRoomRepository.save(ChatRoom.builder().members(chatRoomMembers).build());
 
         return ChatRoomCreateResponse.fromEntity(newChatRoom);
+    }
+
+    private void validateIfChatRoomAlreadyExist(Set<Member> chatRoomMembers) {
+
+        List<Member> members = chatRoomMembers.stream().collect(Collectors.toList());
+
+        if (chatRoomRepository.existsByMembersContainingAndMembersContaining(members.get(0), members.get(1))) {
+
+            log.info("ChatRoomCreateResponse.validateIfChatRoomAlreadyExist : Chat Already Exist");
+
+            throw new ChatException(ErrorCode.CHAT_ROOM_ALREADY_EXIST);
+        }
     }
 
     // 채팅룸에 소속된 사람인지 확인
@@ -97,7 +114,7 @@ public class ChatRoomService {
     @Transactional
     public void exitFromChatRoom(ChatRoomExitRequest request) {
 
-        ChatRoom chatRoom = chatRoomRepository.findById(request.getChatMemberId())
+        ChatRoom chatRoom = chatRoomRepository.findById(request.getChatRoomId())
                 .orElseThrow(() -> new ChatException(ErrorCode.CHAT_ROOM_NOT_FOUND));
 
         Member member = memberRepository.findById(request.getMemberId())

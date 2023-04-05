@@ -40,7 +40,6 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, errorCode.getHttpStatus());
     }
 
-
     @ExceptionHandler
     public ResponseEntity<ErrorResponse> handleUsernameNotFoundException(UsernameNotFoundException e){
 
@@ -51,6 +50,14 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler
     public ResponseEntity<ErrorResponse> handleDataIntegrityViolationException(DataIntegrityViolationException e){
+
+        ErrorResponse response = new ErrorResponse(e.toString(), e.getMessage());
+
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<ErrorResponse> handleNullPointerException(NullPointerException e){
 
         ErrorResponse response = new ErrorResponse(e.toString(), e.getMessage());
 
