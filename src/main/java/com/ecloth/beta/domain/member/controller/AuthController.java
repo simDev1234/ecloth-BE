@@ -16,6 +16,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
+import javax.mail.MessagingException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 
@@ -38,7 +39,7 @@ public class AuthController {
 
     @ApiOperation(value = "회원 가입", notes = "회원 가입을 진행한다.")
     @PostMapping("/register")
-    public ResponseEntity<Member> memberRegister(@RequestBody MemberRequest.Register registerDto) {
+    public ResponseEntity<Member> memberRegister(@RequestBody MemberRequest.Register registerDto) throws MessagingException {
 
         Member member = authService.register(registerDto);
 
@@ -99,7 +100,7 @@ public class AuthController {
 
     @ApiOperation(value = "비밀번호 변경 코드 발송", notes = "회원가입된 사용자의 이메일로 비밀번호 변경 코드를 생성하여 전달한다.")
     @GetMapping("/member/resetPassword")
-    public ResponseEntity<String> passwordReset(String email) {
+    public ResponseEntity<String> passwordReset(String email) throws MessagingException {
         authService.resetPassword(email);
         return ResponseEntity.ok().body("입력하신 이메일로 비밀번호 변경 코드를 전송했습니다.");
     }

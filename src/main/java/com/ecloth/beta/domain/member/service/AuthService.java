@@ -23,6 +23,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.mail.MessagingException;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -43,7 +44,7 @@ public class AuthService {
     private final OauthService oauthService;
     private final JavaMailSenderComponent javaMailSenderComponent;
 
-    public Member register(MemberRequest.Register RegisterDto) {
+    public Member register(MemberRequest.Register RegisterDto) throws MessagingException {
         // 이메일 중복 체크
         if (memberRepository.existsByEmail(RegisterDto.getEmail())) {
             throw new MemberException(MemberErrorCode.ALREADY_EXIST_EMAIL);
@@ -67,8 +68,10 @@ public class AuthService {
 
         // 이메일 전송
         String subject = "이옷어때? 의 이메일 인증을 완료해주세요!";
-        String content = "아래 링크를 클릭하여 이메일 인증을 진행해주세요. \n 이메일 인증 완료 후 모든 서비스를 이용 하실 수 있습니다. \n"
-                + "http://localhost:5173/api/email-auth?code=" + emailAuthCode;
+        String content = "아래 링크를 클릭후, 이메일 인증 코드를 입력하시어 이메일 인증을 진행해주세요. " +
+                "<br> 이메일 인증 완료 후 모든 서비스를 이용 하실 수 있습니다. " +
+                "<br> 이메일 인증코드 : " + emailAuthCode + "<br>"
+                + "<a href='http://localhost:5173/profile/edit'>인증하기</a>";
 
         javaMailSenderComponent.sendMail(RegisterDto.getEmail(), subject, content);
 
@@ -224,7 +227,7 @@ public class AuthService {
         }
     }
 
-    public void resetPassword(String email) {
+    public void resetPassword(String email) throws MessagingException {
         Member member = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND_USER));
         String status = String.valueOf(member.getMemberStatus());
@@ -237,9 +240,9 @@ public class AuthService {
         LocalDateTime requestDate = LocalDateTime.now();
 
         String subject = "이옷어때? 에서 비밀번호 변경 코드를 발송했습니다.";
-        String content = "비밀번호 변경 코드를 아래 링크에 입력 후,새로운 비밀번호로 변경해주세요. \n"
-                + code + "\n"
-                + "http://localhost:5173/api/member/resetPassword/update";
+        String content = "비밀번호 변경 코드를 아래 링크에 입력 후,새로운 비밀번호로 변경해주세요. " +
+                "<br> 비밀번호 변경 코드 : " + code + "<br>"
+                + "<a href='http://localhost:5173/ChangePassword'>비밀번호 변경하기</a>";
 
         javaMailSenderComponent.sendMail(email, subject, content);
 
