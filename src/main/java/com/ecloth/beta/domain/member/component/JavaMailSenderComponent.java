@@ -3,21 +3,28 @@ package com.ecloth.beta.domain.member.component;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
+
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
 
 @Component
 @RequiredArgsConstructor
 public class JavaMailSenderComponent {
 
     private final JavaMailSender javaMailSender;
-    public void sendMail(String email, String subject, String content){
+    public void sendMail(String email, String subject, String content) throws MessagingException {
 
-        SimpleMailMessage msg = new SimpleMailMessage();
-        msg.setTo(email);
-        msg.setSubject(subject);
-        msg.setText(content);
+        MimeMessage message = javaMailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
-        javaMailSender.send(msg);
+        helper.setTo(email);
+        helper.setSubject(subject);
+        String htmlContent = "<html><body>" + content + "</body></html>";
+        helper.setText(htmlContent, true);
+
+        javaMailSender.send(message);
     }
 
 }
