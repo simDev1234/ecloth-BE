@@ -15,13 +15,15 @@ public class PostingCreateRequest {
     private Long memberId;
     private String title;
     private String content;
-    private MultipartFile[] images;
+    // private MultipartFile[] imageFiles;
 
     public Posting toPosting(Member writer){
         return Posting.builder()
                 .writer(writer)
                 .title(this.title)
                 .content(this.content)
+                .likeCount(0L)
+                .viewCount(0L)
                 .build();
     }
 

@@ -23,6 +23,25 @@ public class ChatRoomCreateResponse implements Serializable {
 - 원인 : 컨트롤러의 ResponseEntity에 담기는 DTO에 Getter가 없어, Jackson 라이브러리가 Json으로 직렬화를 하지 못함
 - 해결 : @Getter를 붙이고, Snake 방식으로 반환하기 위해 @JsonNaming Annotaion을 붙여주었다.
 
+## ISSUE 3. MultipartFile Minimum Size Error
+```java
+org.apache.tomcat.util.http.fileupload.impl.FileSizeLimitExceededException: The field images exceeds its maximum permitted size of 1048576 bytes.
+```
+- 원인 : 디폴트 값인 1048576 bytes (약 1MB) 을 넘어서는 image를 전달했기 때문
+- 해결 : 아래와 같이 설정값을 추가했다.
+```java
+spring.servlet.multipart.maxFileSize=10MB
+spring.servlet.multipart.maxRequestSize=10MB
+```
+
+## ISSUE 4. MultipartFile Minimum Size Error
+```java
+'java.lang.String' to required type 'org.springframework.web.multipart.MultipartFile' for property 'images[0]': no matching editors or conversion strategy found]]
+```
+- 원인 : MultipartFile[] 타입인 images 변수값을 null 값으로 받을 때 bindException이 나타남 
+- 해결 : 컨트롤러에 @RequestParam(value = "file", required = false) 로 images를 따로 뽑아 해결 
+
+<br>
 
 # 2. 쿼리 분석
 ```

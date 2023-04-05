@@ -31,15 +31,15 @@ public class PostingController {
     // 포스트 등록
     @PostMapping(value = "/feed/post", consumes = {"multipart/form-data"})
     public ResponseEntity<Void> postCreate(@ApiIgnore @AuthenticationPrincipal MemberDetails memberDetails,
+                                           @RequestParam(value = "file", required = false) MultipartFile[] images,
                                            PostingCreateRequest request) throws Exception {
 
         request.setMemberId(memberDetails.getMemberId());
 
-        postingService.createPost(request);
+        postingService.createPost(images, request);
 
         return ResponseEntity.ok().build();
     }
-
 
     // 게시글 목록 조회 - 필터 : 조회수순, 좋아요순, 최신순
     @GetMapping("/feed/post")
@@ -72,10 +72,10 @@ public class PostingController {
     // 포스트 수정
     @PutMapping("/feed/post/{postingId}")
     public ResponseEntity<Void> postUpdate(@RequestBody PostingUpdateRequest request,
-
+                                           @RequestParam(value = "file", required = false) MultipartFile[] images,
                                            @PathVariable Long postingId) throws Exception {
 
-        postingService.updatePost(postingId, request);
+        postingService.updatePost(postingId, images, request);
 
         return ResponseEntity.ok().build();
     }

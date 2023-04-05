@@ -16,12 +16,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.persistence.EntityNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -35,7 +34,7 @@ public class PostingService {
     private final RedisClient redisClient;
     private final S3FileUploader s3FileUploader;
 
-    public void createPost(PostingCreateRequest request) throws Exception {
+    public void createPost(MultipartFile[] images, PostingCreateRequest request) throws Exception {
 
         // 회원 확인
         Member writer = memberRepository.findById(request.getMemberId())
@@ -45,9 +44,9 @@ public class PostingService {
         Posting newPosting = postingRepository.save(request.toPosting(writer));
 
         // 이미지 생성
-        List<Image> imageList = createImageAfterSavingToS3(request.getImages(), newPosting);
-
+        List<Image> imageList = createImageAfterSavingToS3(images, newPosting);
         newPosting.changeImageList(imageList);
+
         postingRepository.save(newPosting);
     }
 
@@ -68,17 +67,19 @@ public class PostingService {
 
         List<Image> imageList = new ArrayList<>();
 
-        for (int i = 0; i < images.length; i++) {
-            String imageUrlPath = s3FileUploader.uploadImageToS3AndGetURL(images[i]);
-            if (StringUtils.hasText(imageUrlPath)) {
-                Image newImage = imageRepository.save(
-                        Image.builder().posting(newPosting).url(imageUrlPath).isRepresentImage(i == 0).build()
-                );
-                imageList.add(newImage);
+        if (Objects.nonNull(images) && images.length > 0) {
+            for (int i = 0; i < images.length; i++) {
+                if (!images[i].isEmpty()) {
+                    String imageUrlPath = s3FileUploader.uploadImageToS3AndGetURL(images[i]);
+                    Image newImage = imageRepository.save(
+                            Image.builder().posting(newPosting).url(imageUrlPath).isRepresentImage(i == 0).build()
+                    );
+                    imageList.add(newImage);
+                }
             }
         }
-        return imageList;
 
+        return imageList;
     }
 
     public PostingDetailResponse getPostDetail(Long postingId) {
@@ -103,7 +104,7 @@ public class PostingService {
         return PostingListResponse.fromEntity(postingPage);
     }
 
-    public void updatePost(Long postingId, PostingUpdateRequest request) throws Exception {
+    public void updatePost(Long postingId, MultipartFile[] images, PostingUpdateRequest request) throws Exception {
 
         // 포스트 조회
         Posting posting = postingRepository.findByPostingIdFetchJoinedWithMember(postingId)
@@ -114,7 +115,7 @@ public class PostingService {
         posting.changeContent(request.getContent());
 
         // 교체할 이미지
-        List<Image> imageList = createImageAfterSavingToS3(request.getImages(), posting);
+        List<Image> imageList = createImageAfterSavingToS3(images, posting);
         posting.changeImageList(imageList);
 
     }
