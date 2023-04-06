@@ -32,16 +32,15 @@ public class PostingController {
     // 포스트 등록
     @PostMapping(value = "/feed/post", consumes = {"multipart/form-data"})
     public ResponseEntity<?> postCreate(@ApiIgnore @AuthenticationPrincipal MemberDetails memberDetails,
-                                        @RequestParam(value = "file", required = false) MultipartFile[] images,
                                         PostingCreateRequest request) throws Exception {
 
         request.setMemberId(memberDetails.getMemberId());
 
-        if (ArrayUtils.isEmpty(images)) {
+        if (ArrayUtils.isEmpty(request.getImages())) {
             return new ResponseEntity<>("이미지를 1개 이상 등록해주세요.", HttpStatus.BAD_REQUEST);
         }
 
-        postingService.createPost(images, request);
+        postingService.createPost(request.getImages(), request);
 
         return ResponseEntity.ok().build();
     }
@@ -77,17 +76,16 @@ public class PostingController {
     // 포스트 수정
     @PutMapping(value = "/feed/post/{postingId}", consumes = {"multipart/form-data"})
     public ResponseEntity<?> postUpdate(@PathVariable Long postingId,
-                                           @ApiIgnore @AuthenticationPrincipal MemberDetails memberDetails,
-                                           @RequestParam(value = "file", required = false) MultipartFile[] images,
-                                           PostingUpdateRequest request) throws Exception {
+                                        @ApiIgnore @AuthenticationPrincipal MemberDetails memberDetails,
+                                        PostingUpdateRequest request) throws Exception {
 
         request.setMemberId(memberDetails.getMemberId());
 
-        if (ArrayUtils.isEmpty(images)) {
+        if (ArrayUtils.isEmpty(request.getImages())) {
             return new ResponseEntity<>("이미지를 1개 이상 등록해주세요.", HttpStatus.BAD_REQUEST);
         }
 
-        postingService.updatePost(postingId, images, request);
+        postingService.updatePost(postingId, request.getImages(), request);
 
         return ResponseEntity.ok().build();
     }

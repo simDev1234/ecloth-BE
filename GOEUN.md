@@ -44,16 +44,15 @@ spring.servlet.multipart.maxRequestSize=10MB
 ```java
 @PostMapping(value = "/feed/post", consumes = {"multipart/form-data"})
 public ResponseEntity<?> postCreate(@ApiIgnore @AuthenticationPrincipal MemberDetails memberDetails,
-                                    @RequestParam(value = "file", required = false) MultipartFile[] images,
-                                    PostingCreateRequest request) throws Exception {
+                                     PostingCreateRequest request) throws Exception {
 
     request.setMemberId(memberDetails.getMemberId());
 
-    if (ArrayUtils.isEmpty(images)) {
-        return new ResponseEntity<>("이미지를 1개 이상 등록해주세요.", HttpStatus.BAD_REQUEST);
+    if (ArrayUtils.isEmpty(request.getImages())) {
+    return new ResponseEntity<>("이미지를 1개 이상 등록해주세요.", HttpStatus.BAD_REQUEST);
     }
 
-    postingService.createPost(images, request);
+    postingService.createPost(request.getImages(), request);
 
     return ResponseEntity.ok().build();
 }
