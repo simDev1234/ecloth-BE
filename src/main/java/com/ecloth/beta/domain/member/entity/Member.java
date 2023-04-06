@@ -9,12 +9,14 @@ import com.ecloth.beta.domain.member.exception.MemberErrorCode;
 import com.ecloth.beta.domain.member.exception.MemberException;
 import com.ecloth.beta.domain.member.model.MemberRole;
 import com.ecloth.beta.domain.member.model.MemberStatus;
+import com.ecloth.beta.utill.S3FileUploader;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.envers.AuditOverride;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -79,15 +81,16 @@ public class Member extends BaseEntity implements Serializable {
     @ManyToMany(mappedBy = "members")
     private Set<ChatRoom> chatRooms = new HashSet<>();
 
-    public void update(MemberUpdateInfoRequest request, PasswordEncoder passwordEncoder) {
+    public void update(MemberUpdateInfoRequest request, PasswordEncoder passwordEncoder, S3FileUploader s3FileUploader) {
         if (request.getNickname() != null) {
             this.nickname = request.getNickname();
         }
         if (request.getPhone() != null) {
             this.phone = request.getPhone();
         }
-        if (request.getProfileImagePath() != null) {
-            this.profileImagePath = request.getProfileImagePath();
+        if (request.getProfileImage() != null) {
+            MultipartFile profileImage = request.getProfileImage();
+            this.profileImagePath = s3FileUploader.uploadImageToS3AndGetURL(profileImage);
         }
         if (request.getNewPassword() != null && request.getPassword() != null) {
             if (!passwordEncoder.matches(request.getPassword(), this.password)) {

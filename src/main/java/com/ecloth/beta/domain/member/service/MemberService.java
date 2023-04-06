@@ -7,6 +7,7 @@ import com.ecloth.beta.domain.member.entity.Member;
 import com.ecloth.beta.domain.member.exception.MemberErrorCode;
 import com.ecloth.beta.domain.member.exception.MemberException;
 import com.ecloth.beta.domain.member.repository.MemberRepository;
+import com.ecloth.beta.utill.S3FileUploader;
 import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +28,7 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
     private final RedisTemplate<String, String> redisTemplate;
+    private final S3FileUploader s3FileUploader;
 
     // 회원 정보 조회
     public MemberInfoResponse getMemberInfo(Long memberId, String role) {
@@ -52,7 +54,7 @@ public class MemberService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND_USER));
 
-        member.update(request, passwordEncoder);
+        member.update(request, passwordEncoder, s3FileUploader);
         memberRepository.save(member);
 
     }
