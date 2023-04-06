@@ -71,7 +71,7 @@ public class AuthService {
         String content = "아래 링크를 클릭후, 이메일 인증 코드를 입력하시어 이메일 인증을 진행해주세요. " +
                 "<br> 이메일 인증 완료 후 모든 서비스를 이용 하실 수 있습니다. " +
                 "<br> 이메일 인증코드 : " + emailAuthCode + "<br>"
-                + "<a href='http://ecloth-fe-ashy.vercel.app/profile/edit'>인증하기</a>";
+                + "<a href='https://ecloth-fe-ashy.vercel.app/profile/edit'>인증하기</a>";
 
         javaMailSenderComponent.sendMail(RegisterDto.getEmail(), subject, content);
 
@@ -242,7 +242,7 @@ public class AuthService {
         String subject = "이옷어때? 에서 비밀번호 변경 코드를 발송했습니다.";
         String content = "비밀번호 변경 코드를 아래 링크에 입력 후,새로운 비밀번호로 변경해주세요. " +
                 "<br> 비밀번호 변경 코드 : " + code + "<br>"
-                + "<a href='http://ecloth-fe-ashy.vercel.app/ChangePassword'>비밀번호 변경하기</a>";
+                + "<a href='https://ecloth-fe-ashy.vercel.app/ChangePassword'>비밀번호 변경하기</a>";
 
         javaMailSenderComponent.sendMail(email, subject, content);
 
