@@ -49,7 +49,7 @@ public ResponseEntity<?> postCreate(@ApiIgnore @AuthenticationPrincipal MemberDe
 
     request.setMemberId(memberDetails.getMemberId());
 
-    if (ArrayUtils.isEmpty(request.getImages())) {
+    if (ArrayUtils.isEmpty(images)) {
         return new ResponseEntity<>("이미지를 1개 이상 등록해주세요.", HttpStatus.BAD_REQUEST);
     }
 

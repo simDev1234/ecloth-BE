@@ -37,7 +37,7 @@ public class PostingController {
 
         request.setMemberId(memberDetails.getMemberId());
 
-        if (ArrayUtils.isEmpty(request.getImages())) {
+        if (ArrayUtils.isEmpty(images)) {
             return new ResponseEntity<>("이미지를 1개 이상 등록해주세요.", HttpStatus.BAD_REQUEST);
         }
 
@@ -76,12 +76,17 @@ public class PostingController {
 
     // 포스트 수정
     @PutMapping(value = "/feed/post/{postingId}", consumes = {"multipart/form-data"})
-    public ResponseEntity<Void> postUpdate(@PathVariable Long postingId,
+    public ResponseEntity<?> postUpdate(@PathVariable Long postingId,
                                            @ApiIgnore @AuthenticationPrincipal MemberDetails memberDetails,
                                            @RequestParam(value = "file", required = false) MultipartFile[] images,
                                            PostingUpdateRequest request) throws Exception {
 
         request.setMemberId(memberDetails.getMemberId());
+
+        if (ArrayUtils.isEmpty(images)) {
+            return new ResponseEntity<>("이미지를 1개 이상 등록해주세요.", HttpStatus.BAD_REQUEST);
+        }
+
         postingService.updatePost(postingId, images, request);
 
         return ResponseEntity.ok().build();
