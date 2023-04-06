@@ -110,6 +110,11 @@ public class PostingService {
         Posting posting = postingRepository.findByPostingIdFetchJoinedWithMember(postingId)
                 .orElseThrow(() -> new PostingException(ErrorCode.POSTING_NOT_FOUND));
 
+        // 포스트 작성자 여부 확인
+        if (!posting.getWriter().getMemberId().equals(request.getMemberId())) {
+            throw new PostingException(ErrorCode.POSTING_WRITER_NOT_MATCHING);
+        }
+
         // 포스트 제목, 본문 수정
         posting.changeTitle(request.getTitle());
         posting.changeContent(request.getContent());

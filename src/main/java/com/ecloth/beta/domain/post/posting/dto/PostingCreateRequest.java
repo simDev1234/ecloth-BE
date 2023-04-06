@@ -2,6 +2,7 @@ package com.ecloth.beta.domain.post.posting.dto;
 
 import com.ecloth.beta.domain.member.entity.Member;
 import com.ecloth.beta.domain.post.posting.entity.Posting;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -12,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Setter
 public class PostingCreateRequest {
 
+    @ApiModelProperty(hidden = true)
     private Long memberId;
     private String title;
     private String content;

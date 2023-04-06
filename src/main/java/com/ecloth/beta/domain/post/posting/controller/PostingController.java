@@ -75,11 +75,13 @@ public class PostingController {
     }
 
     // 포스트 수정
-    @PutMapping("/feed/post/{postingId}")
-    public ResponseEntity<Void> postUpdate(@RequestBody PostingUpdateRequest request,
+    @PutMapping(value = "/feed/post/{postingId}", consumes = {"multipart/form-data"})
+    public ResponseEntity<Void> postUpdate(@PathVariable Long postingId,
+                                           @ApiIgnore @AuthenticationPrincipal MemberDetails memberDetails,
                                            @RequestParam(value = "file", required = false) MultipartFile[] images,
-                                           @PathVariable Long postingId) throws Exception {
+                                           PostingUpdateRequest request) throws Exception {
 
+        request.setMemberId(memberDetails.getMemberId());
         postingService.updatePost(postingId, images, request);
 
         return ResponseEntity.ok().build();
