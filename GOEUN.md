@@ -58,6 +58,18 @@ public ResponseEntity<?> postCreate(@ApiIgnore @AuthenticationPrincipal MemberDe
 }
 ```
 
+## ISSUE 5. PUT으로 multipart/form 데이터를 보내면 415 에러가 나타남
+```bash
+{
+  "timestamp": "2023-04-06T02:59:15.806+00:00",
+  "status": 415,
+  "error": "Unsupported Media Type",
+  "path": "/api/feed/post/7"
+}
+```
+- 원인 : multipart/form 데이터는 POST로만 전송할 수 있다.
+- 해결 : 메소드를 PUT 에서 POST로 변경
+
 <br>
 
 # 2. 쿼리 분석

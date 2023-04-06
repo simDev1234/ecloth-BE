@@ -36,7 +36,7 @@ public class PostingController {
 
         request.setMemberId(memberDetails.getMemberId());
 
-        if (ArrayUtils.isEmpty(request.getImages())) {
+        if (ArrayUtils.isEmpty(request.getImages()) || request.getImages().length == 0) {
             return new ResponseEntity<>("이미지를 1개 이상 등록해주세요.", HttpStatus.BAD_REQUEST);
         }
 
@@ -74,14 +74,14 @@ public class PostingController {
     }
 
     // 포스트 수정
-    @PutMapping(value = "/feed/post/{postingId}", consumes = {"multipart/form-data"})
+    @PostMapping(value = "/feed/post/{postingId}", consumes = {"multipart/form-data"})
     public ResponseEntity<?> postUpdate(@PathVariable Long postingId,
                                         @ApiIgnore @AuthenticationPrincipal MemberDetails memberDetails,
                                         PostingUpdateRequest request) throws Exception {
 
         request.setMemberId(memberDetails.getMemberId());
 
-        if (ArrayUtils.isEmpty(request.getImages())) {
+        if (ArrayUtils.isEmpty(request.getImages()) || request.getImages().length == 0) {
             return new ResponseEntity<>("이미지를 1개 이상 등록해주세요.", HttpStatus.BAD_REQUEST);
         }
 
