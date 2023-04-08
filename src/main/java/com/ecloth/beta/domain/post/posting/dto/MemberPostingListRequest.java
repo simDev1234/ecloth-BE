@@ -6,7 +6,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class MemberPostingListRequest extends CustomPage{
+public class MemberPostingListRequest extends CustomPage {
 
     public MemberPostingListRequest(int page, int size, String sortBy, String sortOrder) {
         super(page, size, sortBy, sortOrder);

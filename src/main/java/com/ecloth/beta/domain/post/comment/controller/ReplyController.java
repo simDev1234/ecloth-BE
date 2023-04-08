@@ -1,7 +1,5 @@
 package com.ecloth.beta.domain.post.comment.controller;
 
-import com.ecloth.beta.common.page.CustomPage;
-import com.ecloth.beta.domain.post.comment.dto.ReplyListResponse;
 import com.ecloth.beta.domain.post.comment.dto.ReplyRequest;
 import com.ecloth.beta.domain.post.comment.dto.ReplyResponse;
 import com.ecloth.beta.domain.post.comment.service.ReplyService;
@@ -29,16 +27,6 @@ public class ReplyController {
         ReplyResponse replyResponse = replyService.createReply(commentId, replyRequest);
 
         return ResponseEntity.ok(replyResponse);
-    }
-
-
-    // TODO 댓글 토글 형태인지 확인하고 재수정 필요
-    @GetMapping("/{commentId}")
-    public ResponseEntity<?> replyList(@PathVariable Long commentId, CustomPage requestPage) {
-
-        //ReplyListResponse replyListResponse = replyService.getReplyList(commentId, requestPage);
-
-        return ResponseEntity.ok().build();
     }
 
     @PutMapping("/reply/{replyId}")
