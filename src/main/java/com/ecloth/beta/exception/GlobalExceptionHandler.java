@@ -12,6 +12,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.net.BindException;
+
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -58,6 +60,14 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler
     public ResponseEntity<ErrorResponse> handleNullPointerException(NullPointerException e){
+
+        ErrorResponse response = new ErrorResponse(e.toString(), e.getMessage());
+
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<ErrorResponse> handleBindException(BindException e){
 
         ErrorResponse response = new ErrorResponse(e.toString(), e.getMessage());
 
