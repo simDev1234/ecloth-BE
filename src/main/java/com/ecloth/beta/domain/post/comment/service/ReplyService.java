@@ -2,8 +2,6 @@ package com.ecloth.beta.domain.post.comment.service;
 
 import com.ecloth.beta.domain.member.entity.Member;
 import com.ecloth.beta.domain.member.repository.MemberRepository;
-import com.ecloth.beta.domain.post.comment.dto.ReplyListRequest;
-import com.ecloth.beta.domain.post.comment.dto.ReplyListResponse;
 import com.ecloth.beta.domain.post.comment.dto.ReplyRequest;
 import com.ecloth.beta.domain.post.comment.dto.ReplyResponse;
 import com.ecloth.beta.domain.post.comment.entity.Comment;
@@ -15,7 +13,6 @@ import com.ecloth.beta.domain.post.comment.repository.ReplyRepository;
 import com.ecloth.beta.domain.post.posting.repository.PostingRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 
@@ -61,14 +58,6 @@ public class ReplyService {
             throw new CommentException(ErrorCode.POSTING_WRITER_REPLY_WRITER_NOT_MATCHING);
         }
     }
-
-    // 대댓글 조회
-//    public ReplyListResponse getReplyList(Long commentId, ReplyListRequest request) {
-//
-//
-//
-//        return ReplyListResponse.fromEntity(replies);
-//    }
 
 
     // 대댓글 수정
