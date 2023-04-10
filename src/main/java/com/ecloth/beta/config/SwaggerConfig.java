@@ -43,6 +43,14 @@ public class SwaggerConfig {
                 .securitySchemes(Arrays.asList(apiKey()));
     }
 
+    private ApiInfo apiInfo(){
+        return new ApiInfoBuilder()
+                .title("이옷어때 API Document")
+                .description("이옷어때의 API를 사용해보세요.")
+                .version("1.0.0")
+                .build();
+    }
+
     private Set<String> getConsumeContentTypes() {
         Set<String> consumes = new HashSet<>();
         consumes.add("application/json;charset=UTF-8");
@@ -55,14 +63,6 @@ public class SwaggerConfig {
         Set<String> produces = new HashSet<>();
         produces.add("application/json;charset=UTF-8");
         return produces;
-    }
-
-    private ApiInfo apiInfo(){
-        return new ApiInfoBuilder()
-                .title("이옷어때 API Document")
-                .description("이옷어때의 API를 사용해보세요.")
-                .version("1.0.0")
-                .build();
     }
 
     private SecurityContext securityContext() {
