@@ -30,21 +30,15 @@ public class SwaggerConfig {
     @Bean
     public Docket api() {
         return new Docket(DocumentationType.OAS_30)
-                // host
                 .host(host.substring(7))
-                // content type
                 .consumes(getConsumeContentTypes())
                 .produces(getProduceContentTypes())
-                // protocol
                 .protocols(new HashSet<>(Arrays.asList("http", "https")))
-                // api information
                 .apiInfo(apiInfo())
                 .select()
                 .apis(RequestHandlerSelectors.basePackage("com.ecloth.beta"))
-                // api paths
                 .paths(PathSelectors.any())
                 .build()
-                // security - authorization header
                 .securityContexts(Arrays.asList(securityContext()))
                 .securitySchemes(Arrays.asList(apiKey()));
     }
