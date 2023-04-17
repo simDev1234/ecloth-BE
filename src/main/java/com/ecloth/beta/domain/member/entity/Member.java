@@ -10,6 +10,7 @@ import com.ecloth.beta.domain.member.exception.MemberException;
 import com.ecloth.beta.domain.member.model.MemberRole;
 import com.ecloth.beta.domain.member.model.MemberStatus;
 import com.ecloth.beta.utill.S3FileUploader;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -72,12 +73,15 @@ public class Member extends BaseEntity implements Serializable {
     private int y;
 
     // follow & follower
+    @JsonIgnore
     @OneToMany(mappedBy = "requester")
     private List<Follow> followList = new ArrayList<>();
+    @JsonIgnore
     @OneToMany(mappedBy = "target")
     private List<Follow> followerList = new ArrayList<>();
 
     // chat room
+    @JsonIgnore
     @ManyToMany(mappedBy = "members")
     private Set<ChatRoom> chatRooms = new HashSet<>();
 
