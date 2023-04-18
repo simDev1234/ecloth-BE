@@ -91,7 +91,7 @@ public class MemberService {
             log.info("MemberService.updateMemberStatus : OAuth 가입 회원의 OAuth, Server Refresh Token Redis에서 삭제");
             log.info(redisTemplate.opsForValue().get("KRT:"+ memberId));
 
-            deleteOAuthRefreshTokenFromRedis(memberId, role);
+            deleteOAuthRefreshTokenFromRedis(memberId);
             deleteServerRefreshTokenFromRedis(memberId);
 
         } else{
@@ -106,7 +106,7 @@ public class MemberService {
 
     }
 
-    private void deleteOAuthRefreshTokenFromRedis(Long memberId, String role) {
+    private void deleteOAuthRefreshTokenFromRedis(Long memberId) {
         redisTemplate.delete("KRT:" + memberId);
     }
 

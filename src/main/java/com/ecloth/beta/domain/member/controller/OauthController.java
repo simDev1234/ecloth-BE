@@ -7,7 +7,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -23,7 +22,7 @@ public class OauthController {
     private final OauthService oAuthService;
 
     @ApiOperation(value = "카카오 로그인", notes = "카카오계정을 통해 로그인을 진행한다.")
-    @GetMapping("/KakaoLogin")
+    @GetMapping("/oauth/kakao")
     public ResponseEntity<Object> kakaoLogin(@ApiIgnore @RequestParam("code") String authCode) {
         log.info("카카오 authcode 받음 : " + authCode);
 
