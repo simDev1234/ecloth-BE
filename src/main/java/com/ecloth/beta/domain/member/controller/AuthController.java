@@ -99,14 +99,14 @@ public class AuthController {
     }
 
     @ApiOperation(value = "비밀번호 변경 코드 발송", notes = "회원가입된 사용자의 이메일로 비밀번호 변경 코드를 생성하여 전달한다.")
-    @GetMapping("/member/resetPassword")
+    @GetMapping("/member/reset-password")
     public ResponseEntity<String> passwordReset(String email) throws MessagingException {
         authService.resetPassword(email);
         return ResponseEntity.ok().body("입력하신 이메일로 비밀번호 변경 코드를 전송했습니다.");
     }
 
     @ApiOperation(value = "비밀번호 변경 코드를 이용한 비밀번호 변경", notes = "비밀번호 초기화를 통해 발송된 비밀번호 변경 코드로 회원의 비밀번호룰 수정한다.")
-    @PostMapping("/member/resetPassword/update")
+    @PostMapping("/member/reset-password/update")
     public ResponseEntity<String> passwordResetUpdate(MemberPasswordUpdateRequest request) {
         authService.resetPasswordUpdate(request);
         return ResponseEntity.ok().body("비밀번호 변경이 완료되었습니다.");
