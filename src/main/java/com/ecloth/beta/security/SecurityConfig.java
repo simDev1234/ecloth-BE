@@ -1,9 +1,6 @@
 package com.ecloth.beta.security;
 
-import com.ecloth.beta.security.jwt.JwtAuthenticationEntryPoint;
-import com.ecloth.beta.security.jwt.JwtAuthenticationFilter;
-import com.ecloth.beta.security.jwt.JwtTokenProvider;
-import com.ecloth.beta.security.jwt.JwtTokenUtil;
+import com.ecloth.beta.security.jwt.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -59,6 +56,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
+
         http
                 .httpBasic().disable()
                 .formLogin().disable()
@@ -69,6 +67,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider, jwtTokenUtil),
                         UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling()
+                .accessDeniedHandler(new JwtAccessDeniedHandler())
                 .authenticationEntryPoint(jwtAuthenticationEntryPoint)
 
                 .and()
