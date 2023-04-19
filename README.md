@@ -21,11 +21,7 @@
   3. 1 : 1 채팅 외에 1 : N 채팅 또한 가능하게 추가 필요
   4. S3 서버와 CloundFront를 연동하여 S3를 CDN 서버로 사용할 필요
 ``````
-
-<img width="1218" alt="Untitled (3)" src="https://user-images.githubusercontent.com/107039546/233099339-e710a522-ec71-4978-8b78-2cb13c3a6588.png">
-<img width="1240" alt="Untitled (2)" src="https://user-images.githubusercontent.com/107039546/233099436-7fe97763-1c87-4684-aa60-2279eccea05d.png">
-<img width="1230" alt="Untitled (1)" src="https://user-images.githubusercontent.com/107039546/233099379-8193d360-1b7a-4107-bf61-085ca396731b.png">
-<img width="1400" alt="Untitled" src="https://user-images.githubusercontent.com/107039546/233099481-e533e29c-c188-4821-819a-0925c472194e.png">
+             
 
 ## 스택
 - Spring Security
@@ -35,12 +31,20 @@
 - Swagger, Logback
 - AWS EC2, RDS(MySQL), S3
 
-## 구성원
-- 백엔드 : 최고은, 이윤지, 송한별
-- 프론트 : 서유림, 장기철
+<br>
 
 ## 아키텍처 구성도
 ![camping101](https://user-images.githubusercontent.com/107039546/233097879-d3c439f2-62ec-48e9-8e63-48d1caa5dd3a.jpg)
 
+<br>
+
 ## 트러블 슈팅 및 부하테스트 기록
 [https://github.com/Ecloth/ecloth-BE/blob/main/GOEUN.md](https://github.com/Ecloth/ecloth-BE/blob/main/GOEUN.md)
+
+<br>
+
+## 디자인
+<img width="720" alt="Untitled (3)" src="https://user-images.githubusercontent.com/107039546/233099339-e710a522-ec71-4978-8b78-2cb13c3a6588.png">
+<img width="720" alt="Untitled (2)" src="https://user-images.githubusercontent.com/107039546/233099436-7fe97763-1c87-4684-aa60-2279eccea05d.png">
+<img width="720" alt="Untitled (1)" src="https://user-images.githubusercontent.com/107039546/233099379-8193d360-1b7a-4107-bf61-085ca396731b.png">
+<img width="720" alt="Untitled" src="https://user-images.githubusercontent.com/107039546/233099481-e533e29c-c188-4821-819a-0925c472194e.png">
